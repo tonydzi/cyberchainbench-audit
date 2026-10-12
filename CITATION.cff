@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use cyberchainbench-audit in research or software, please cite it as below."
+title: "cyberchainbench-audit"
+type: software
+authors:
+  - family-names: Dziatkovskii
+    given-names: Anton
+    orcid: "https://orcid.org/0000-0001-7408-3054"
+    affiliation: "Palo Alto AI Research Lab"
+repository-code: "https://github.com/tonydzi/cyberchainbench-audit"
+url: "https://github.com/tonydzi/cyberchainbench-audit"
+license: MIT
+date-released: "2026-10-08"
+keywords:
+  - benchmark-audit
+  - llm-evaluation
+  - smart-contract-security
+  - reproducibility
+  - cyberchainbench
+abstract: >-
+  An independent audit of the headline numbers in CyberChainBench
+  (arXiv:2606.26216): 43.7% exploitation and 23.4% patching. The numbers
+  reproduce from the public release (541 case files, patch subset of exactly
+  94 cases), but they are different estimands, a clamped continuous score
+  against a binary conjunction, so they do not form a difficulty ratio. No
+  model is run and nothing is spent; every number is transcribed from the
+  paper or derived from the published case files.
