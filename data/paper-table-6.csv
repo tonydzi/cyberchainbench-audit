@@ -1,0 +1,6 @@
+Type,Definition,Subtypes / Examples
+Price manipulation,The contract relies on a spot price source that an attacker can temporarily distort within a single transaction to extract value.,"Oracle manipulation, flash-loan price distortion, sandwich attack, missing TWAP check, AMM reserve manipulation, missing slippage protection"
+Accounting error,"The contract’s own arithmetic or state-update logic is incorrect, independent of external price feeds.","Integer overflow/underflow, precision loss, rounding error, share inflation, incorrect fee formula, business-logic invariant violation"
+Access control,"A privileged operation is callable by unauthorized parties, or a contract contains intentional backdoors.","Missing onlyOwner check, unprotected initialize() , rug pull, governance manipulation, unguarded selfdestruct"
+Reentrancy,An external call transfers control to untrusted code before the caller finishes updating its own state.,"Single-function reentrancy, cross-function reentrancy, cross-contract reentrancy, read-only reentrancy"
+Input validation,"The contract fails to validate user-supplied parameters, allowing injection of malicious inputs.","Address verification failure, arbitrary callback address, missing length check, signature replay, unvalidated .call() target"

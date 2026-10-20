@@ -1,0 +1,17 @@
+,Detect,Exploit,Patch
+Task-specific input fields
+chain,,,
+contract_address,,,
+proxy_address,,,
+block_number,,,
+type,,,
+function,,,
+attack_txs,,,
+Task-specific available tools
+get_contract_source,,,
+get_decompiled_contract,,,
+get_storage_slot,,,
+eth_call,,,
+get_tx_trace,,,
+validate_exploit,,,
+validate_patch,,,

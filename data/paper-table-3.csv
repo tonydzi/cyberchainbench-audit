@@ -1,0 +1,12 @@
+bench-234: SafeMoon Hack
+chain,bsc
+block_number,26864890
+vulnerable_address,0xeb11...ca7a
+attack_tx,0x48e52a...
+attack_date,2023-03-28
+function,burn
+type,input-validation
+attacker_profit,$8.6M
+patchable,true
+legitimate_txs,"[""0xa3f..."", ...]"
+reference_poc,.../SafeMoon.t.sol
