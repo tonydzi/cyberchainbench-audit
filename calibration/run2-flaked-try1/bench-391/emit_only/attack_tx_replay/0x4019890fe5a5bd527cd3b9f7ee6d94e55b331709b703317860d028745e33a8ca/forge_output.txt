@@ -1,0 +1,23 @@
+Compiling 20 files with Solc 0.8.20
+Solc 0.8.20 finished in 1.90s
+Compiler run successful!
+
+Ran 1 test for src/_benchmark_eval/bench_391/bench_391_attack_tx_1.sol:bench_391_AttackTxReplay_4019890f
+[FAIL: historical attack tx did not succeed before patch] testHistoricalAttackTxReplay() (block: 19417822) (gas: 268201)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 10.70s (10.70s CPU time)
+
+Ran 1 test suite in 10.72s (10.70s CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in src/_benchmark_eval/bench_391/bench_391_attack_tx_1.sol:bench_391_AttackTxReplay_4019890f
+[FAIL: historical attack tx did not succeed before patch] testHistoricalAttackTxReplay() (block: 19417822) (gas: 268201)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+[2m2026-10-20T10:36:00.475195Z[0m [31mERROR[0m [2msharedbackend[0m[2m:[0m Failed to send/recv `storage` [3merr[0m[2m=[0mfailed to get storage for 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 at 81169838302122416030127702501023004717445680794824028937399310444200566613696: HTTP error 408 with body: {"id":90,"jsonrpc":"2.0","error":{"message":"Request timeout on the free plan, please upgrade to paid plan","code":30}}
+
+HTTP diagnostics:
+cf-ray: a4d760fa188d23a2-LIS
+server: cloudflare [3maddress[0m[2m=[0m0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 [3mindex[0m[2m=[0m81169838302122416030127702501023004717445680794824028937399310444200566613696

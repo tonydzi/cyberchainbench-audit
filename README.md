@@ -78,7 +78,7 @@ The counts and the patch arithmetic check out.
 
 ## What the patch oracle actually tests
 
-Read from the code at `1cb7410`. Nothing here was measured on a fork.
+Read from the code at `1cb7410`. The points marked in [calibration/RESULTS.md](calibration/RESULTS.md) were then measured on forks.
 
 - **"Normal operation preserved" is byte equality.** For each replayed historical call,
   `src/infra/cli/validate_patch.py:1330-1332` asserts the same success flag, the same return
@@ -159,14 +159,21 @@ alignment, native decompiler endpoint, rooted source paths, verified source iden
 log-buffer copies. We verified in code the points we cite above; we have not reproduced their
 measurements.
 
+## First measurement (v2.1, 2026-10-20)
+
+The oracle was run without any model on 8 Ethereum patch cases with three fixed inputs (unchanged source,
+`revert()`, emit-only), 24 runs on forks through a free archive RPC. Result, pilot size: on the 3 cases
+that can discriminate at all, a patch that fixes nothing scored 1.0 once per input (bench-391: `revert()`
+and an emit-only patch that leaves the attacker's profit untouched; bench-76: the unchanged source). The
+other 5 cases could not score any patch in this setup. One run's score was flipped by an RPC error. Details,
+logs and caveats: [calibration/RESULTS.md](calibration/RESULTS.md). Reproduce with `calibration/run_all.sh`.
+
 ## The next measurement
 
-The cheapest experiment needs no model: run the patch oracle on the 94 cases with fixed inputs.
-A bare `revert()`, the unchanged verified source and an emit-only patch on all 94 give a first
-estimate of how often the oracle passes patches that fix nothing; a hand-written reference fix on
-a stratified 12 cases is a pilot for how often it fails correct ones. It needs the upstream harness
-(Docker, Foundry), an archive RPC at each case's fork block and block-explorer API access. Only after that is a paid model run worth
-it: Table 5 puts patch at $0.06-$21.86 per case, about $217 for Codex × GPT-5.5 on 94 cases.
+Not done: the other 47 Ethereum cases, a hand-written reference fix on a few cases (to measure how often a
+correct patch fails), an Etherscan-sourced run (this one used Sourcify), BSC (no free archive RPC found), and
+the Harbor verifier path. Only after that is a paid model run worth it: Table 5 puts patch at $0.06-$21.86 per
+case, about $217 for Codex × GPT-5.5 on 94 cases.
 
 ## Files
 
@@ -179,12 +186,13 @@ it: Table 5 puts patch at $0.06-$21.86 per case, about $217 for Codex × GPT-5.5
 | `panel/` | the two adversarial prompts and both model responses from 2026-10-07 |
 | `FINDINGS.md` | every finding of the second review, with both refuters' verdicts |
 | `docs/` | the article, English and Russian |
+| `calibration/` | the oracle calibration: scripts, raw forge logs, [RESULTS.md](calibration/RESULTS.md) |
 
 The arXiv HTML itself is not redistributed; `make tables` fetches it and checks the hash.
 
 ## Scope
 
-Defensive measurement only. Nothing was run against any chain, live or forked. Only historical,
+Defensive measurement only. v2 ran nothing; v2.1 ran read-only local forks of historical state (no transaction was sent to any live network, no wallet used). Only historical,
 publicly disclosed incidents of the DeFiHackLabs corpus are involved; no new vulnerability was sought.
 
 ## Licence
