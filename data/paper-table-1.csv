@@ -1,0 +1,7 @@
+Benchmark,Smart Contract,On-chain,Detect,Exploit,Patch
+BountyBench ( 30 ),,,,,
+CyberGym ( 25 ),,,,,
+ExploitGym ( 26 ),,,,,
+SCONE-bench ( 29 ),,,,,
+EVMbench ( 24 ),,,,,
+CyberChainBench (ours),,,,,

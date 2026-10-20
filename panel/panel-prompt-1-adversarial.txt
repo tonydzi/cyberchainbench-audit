@@ -1,0 +1,51 @@
+You are a hostile methodology reviewer. Find where I am WRONG. Do not validate me.
+
+CONTEXT. Paper: "CyberChainBench" (arXiv 2606.26216, Huang/Jiang/Poovendran/Lin, 24 Jun 2026).
+Headline claim: "Results reveal a clear difficulty gradient: the best configuration scores
+37.5% on detection, 43.7% on exploitation, but only 23.4% on patching." They conclude
+patching is intrinsically the hardest task ("producing a correct fix is far harder than
+identifying or reproducing a vulnerability").
+
+VERIFIED FACTS from the paper itself (I parsed their HTML tables, these cells are exact):
+1. Exploit metric: R = min(observed_profit / reference_profit, 1.0). CONTINUOUS partial
+   credit, best-of-N within a 30-min budget. n = 200 cases.
+2. Patch metric: R = 1[exploit blocked] * 1[normal txs pass]. BINARY conjunction of two
+   predicates. n = 94 cases (filtered from 153 proxy cases). Different, non-identical subset.
+3. Their Table 5 reports patching as "Block / Pass %" separately. Per-config
+   (exploit score vs patch BLOCK rate):
+     Opus 4.7      42.3 vs 46.8
+     Opus 4.6      37.4 vs 57.4
+     GPT-5.5       43.7 vs 47.9
+     GPT-5.4       43.3 vs 54.3
+     GPT-5.2       17.5 vs 56.1
+     Gemini 3.1    20.2 vs 98.9
+     DeepSeek V4   36.6 vs 54.0
+     GLM-5.1       24.9 vs 18.1
+     MiniMax-M2.7  12.0 vs 4.3
+     Kimi-K2.6      3.6 vs 1.1
+   For all six strongest configs, the BLOCK rate exceeds the exploit score.
+4. For GPT-5.5: block 47.9 -> pass 23.4, i.e. 51% of exploit-blocking patches break
+   legitimate callers. Gemini: blocks 98.9%, passes 1.1%.
+
+MY CLAIM (attack it): The headline "difficulty gradient" is substantially a measurement
+artifact, not a demonstrated capability gap. It compares a mean of a continuous partial-credit
+score on one subset against a mean of a binary AND-of-two-predicates on a different, smaller
+subset. Compared like-for-like on the single security-relevant predicate ("did the agent
+neutralize the vulnerability"), patching is NOT harder than exploiting - it is equal or easier
+for every strong configuration. The entire headline gap is produced by the second conjunct,
+normal-operation preservation. So what the paper actually measured is not "fixing is harder
+reasoning than attacking" but "not breaking the protocol while fixing is hard" - a regression /
+software-engineering property, not a security-reasoning property.
+
+QUESTIONS - answer each, briefly and concretely:
+(a) Where is this reasoning wrong or overstated? Give the strongest counterargument.
+(b) Is comparing an exploit partial-credit mean to a patch BLOCK rate actually legitimate,
+    or does that comparison have its own defect? (Note: block rate is also attainable by a
+    trivial always-revert patch - does that make block rate a meaningless baseline and sink
+    my whole argument?)
+(c) Does the different-subset issue (200 exploit vs 94 patch cases) cut for me or against me?
+(d) Is "normal-operation preservation is a regression problem, not a security problem" a
+    distinction without a difference? A real-world auditor must ship a fix that does not break
+    the protocol - so isn't the paper's strict oracle the CORRECT one, and my reframing just
+    excuse-making for models?
+(e) What single additional measurement would most cheaply falsify MY claim?

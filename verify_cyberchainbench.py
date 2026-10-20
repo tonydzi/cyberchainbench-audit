@@ -1,117 +1,135 @@
 #!/usr/bin/env python3
-"""Audit the CyberChainBench headline numbers against its own public release.
+"""Audit CyberChainBench's headline numbers against its own public release.
 
-CyberChainBench (arXiv:2606.26216) headlines "a clear difficulty gradient:
+CyberChainBench (arXiv:2606.26216v1) headlines "a clear difficulty gradient:
 37.5% on detection, 43.7% on exploitation, but only 23.4% on patching".
 
-This script checks what can be checked for free: it reconstructs the benchmark's
-own case subsets from the published dataset and recomputes the published
-aggregates from the published per-difficulty cells. No model is run, no RPC is
-called, nothing is spent. Every number printed below is either read from the
-paper or derived from `data/benchmark/cases/*.json` in the official repository.
+This script checks what can be checked for free. It reconstructs the
+benchmark's own case subsets from the published dataset, recomputes the
+published aggregates from the published per-difficulty cells, compares the
+paper with the leaderboard the authors ship in the same repository, and puts
+uncertainty on the headline numbers. No model is run, no RPC is called,
+nothing is spent.
+
+Inputs:
+  * data/paper-table-4.csv, data/paper-table-5.csv: the paper's Table 4
+    (per-difficulty scores) and Table 5 (cost, tokens, block/pass), parsed
+    structurally from the arXiv HTML by extract_tables.py. Nothing is
+    hand-transcribed.
+  * the upstream release at commit 1cb7410 (tag v1.0): case files under
+    data/benchmark/cases/ and site/assets/leaderboard.json.
 
 Usage:
-    git clone --depth 1 https://github.com/defai-labs/CyberChainBench.git
-    python3 verify_cyberchainbench.py --cases CyberChainBench/data/benchmark/cases
+    git clone https://github.com/defai-labs/CyberChainBench.git
+    git -C CyberChainBench checkout 1cb7410
+    python3 verify_cyberchainbench.py --upstream CyberChainBench
+
+Exit code: 0 when every check reached a verdict (discrepancies included),
+1 when inputs are missing. A discrepancy is a finding, not a script failure.
+
+Who calls it: humans and the Makefile (`make audit`); _test_red_first.py
+runs it on corrupted copies of the data to prove the checks can fail.
+рельса: local python, no LLM.
 """
 from __future__ import annotations
 
 import argparse
 import collections
+import csv
 import glob
 import json
 import math
 import os
 import sys
 
-# ---------------------------------------------------------------------------
-# Values transcribed from the paper. Table 3 = per-difficulty scores,
-# Table 5 = cost/token/task metrics incl. the patch "Block / Pass %" split.
-# ---------------------------------------------------------------------------
-
-# config -> (All, Easy, Med, Hard)
-TABLE3_PATCH = {
-    "Claude Code x Opus 4.7":  (21.3, 22.6, 25.6, 11.1),
-    "Claude Code x Opus 4.6":  (18.1, 29.0, 14.0, 5.6),
-    "Codex x GPT-5.5":         (23.4, 19.4, 32.6, 11.1),
-    "Codex x GPT-5.4":         (19.1, 19.4, 23.3, 11.1),
-    "Codex x GPT-5.2":         (24.5, 25.8, 30.2, 11.1),
-    "Gemini CLI x 3.1 Pro":    (1.1,   0.0,  2.3,  0.0),
-    "OpenCode x DeepSeek V4":  (7.4,  16.1,  4.7,  0.0),
-    "OpenCode x GLM-5.1":      (3.2,   6.5,  2.3,  0.0),
-    "OpenCode x MiniMax-M2.7": (0.0,   0.0,  0.0,  0.0),
-    "OpenCode x Kimi-K2.6":    (1.1,   3.2,  0.0,  0.0),
-}
-
-TABLE3_EXPLOIT = {
-    "Claude Code x Opus 4.7":  (42.3, 41.8, 46.3, 25.9),
-    "Claude Code x Opus 4.6":  (37.4, 39.1, 42.7, 13.0),
-    "Codex x GPT-5.5":         (43.7, 39.8, 50.5, 33.2),
-    "Codex x GPT-5.4":         (43.3, 40.0, 47.6, 30.7),
-    "Codex x GPT-5.2":         (17.5, 24.7, 14.6,  0.0),
-    "Gemini CLI x 3.1 Pro":    (20.2, 26.3, 14.8, 19.5),
-    "OpenCode x DeepSeek V4":  (36.6, 40.3, 36.9, 25.8),
-    "OpenCode x GLM-5.1":      (24.9, 32.9, 19.2, 16.0),
-    "OpenCode x MiniMax-M2.7": (12.0, 13.2, 11.0, 12.0),
-    "OpenCode x Kimi-K2.6":    (3.6,   6.5,  2.2,  0.0),
-}
-
-# config -> (block %, pass %)
-TABLE5_BLOCK_PASS = {
-    "Claude Code x Opus 4.7":  (46.8, 21.3),
-    "Claude Code x Opus 4.6":  (57.4, 18.1),
-    "Codex x GPT-5.5":         (47.9, 23.4),
-    "Codex x GPT-5.4":         (54.3, 19.1),
-    "Codex x GPT-5.2":         (56.1, 17.5),
-    "Gemini CLI x 3.1 Pro":    (98.9,  1.1),
-    "OpenCode x DeepSeek V4":  (54.0,  7.4),
-    "OpenCode x GLM-5.1":      (18.1,  3.2),
-    "OpenCode x MiniMax-M2.7": (4.3,   0.0),
-    "OpenCode x Kimi-K2.6":    (1.1,   1.1),
-}
-
-# Claims the paper makes about its own dataset.
-PAPER_TOTAL_CASES = 541
-PAPER_PATCH_SUBSET = 94
-PAPER_PRE_FILTER = 153          # paper calls these "proxy cases"
-PAPER_POST_CUTOFF = 86          # cases dated 2025 or later
-PAPER_PRE_CUTOFF = 455
-PAPER_BEST_PATCH_CLAIM = 23.4   # "the best patch pass rate (23.4%)"
-CUTOFF = "2025-01-01"
+HERE = os.path.dirname(os.path.realpath(__file__))
 DIFFS = ("easy", "medium", "hard")
+CUTOFF = "2025-01-01"
+UPSTREAM_COMMIT = "1cb7410"
+
+# Claims the paper makes about its own dataset (arXiv:2606.26216v1).
+PAPER = {
+    "total_cases": 541,
+    "patch_subset": 94,
+    "pre_filter": 153,          # text calls these "proxy cases"
+    "post_cutoff": 86,
+    "pre_cutoff": 455,
+    "best_patch_abstract": 23.4,  # abstract and section 4: "the best patch pass rate (23.4%)"
+    "best_patch_text": 21.3,      # section 4: "Opus 4.7 leads on patch pass rate (21.3%)"
+    # Section 4, temporal shift: "Opus 4.7 exploit: 44.9% -> 38.8%" (pre -> post cutoff)
+    "opus47_exploit_pre": 44.9,
+    "opus47_exploit_post": 38.8,
+    "exploit_n": 200,
+}
 
 PASS, FAIL, INFO = "PASS", "DISCREPANCY", "note"
 
 
 class Report:
     def __init__(self) -> None:
-        self.rows: list[tuple[str, str, str]] = []
+        self.rows: list[tuple[str, str]] = []
 
     def add(self, status: str, name: str, detail: str) -> None:
-        self.rows.append((status, name, detail))
+        self.rows.append((status, name))
         mark = {PASS: "[ok  ]", FAIL: "[DIFF]", INFO: "[info]"}[status]
         print(f"{mark} {name}\n       {detail}\n")
 
     def summary(self) -> None:
-        c = collections.Counter(s for s, _, _ in self.rows)
+        c = collections.Counter(s for s, _ in self.rows)
         print("=" * 72)
         print(f"reproduced: {c[PASS]}   discrepancies: {c[FAIL]}   notes: {c[INFO]}")
 
 
+# ----------------------------------------------------------------------------
+# loading
+# ----------------------------------------------------------------------------
+
+def read_table4(path: str) -> dict[str, dict[str, tuple[float, ...]]]:
+    """config -> {"detect"|"exploit"|"patch": (All, Easy, Med, Hard)}."""
+    rows = list(csv.reader(open(path, encoding="utf-8")))
+    out = {}
+    for r in rows[2:]:
+        v = [float(x) for x in r[1:13]]
+        out[r[0]] = {"detect": tuple(v[0:4]), "exploit": tuple(v[4:8]), "patch": tuple(v[8:12])}
+    return out
+
+
+def read_table5(path: str) -> dict[str, dict[str, float]]:
+    """config -> {"patch_cost", "exploit_cost", "block", "pass", "ratio", "profit_m"}."""
+    rows = list(csv.reader(open(path, encoding="utf-8")))
+    out = {}
+    for r in rows[2:]:
+        ratio, profit = (float(x) for x in r[11].split("/"))
+        block, pss = (float(x) for x in r[12].split("/"))
+        out[r[0]] = {"exploit_cost": float(r[2]), "patch_cost": float(r[3]),
+                     "ratio": ratio, "profit_m": profit, "block": block, "pass": pss}
+    return out
+
+
+def canon(name: str) -> str:
+    """Map table and leaderboard naming variants onto one key."""
+    n = name.lower().replace("_", "-").replace(" ", "-")
+    for key in ("opus-4.7", "opus-4-7", "opus-4.6", "opus-4-6", "gpt-5.5", "gpt-5.4",
+                "gpt-5.2", "gemini", "deepseek", "glm", "minimax", "kimi"):
+        if key in n:
+            return key.replace("opus-4-7", "opus-4.7").replace("opus-4-6", "opus-4.6")
+    return n
+
+
 def load_cases(path: str) -> list[dict]:
     files = sorted(glob.glob(os.path.join(path, "*.json")))
-    if not files:
-        sys.exit(f"no case files under {path!r} -- clone the official repo first")
     return [json.load(open(f, encoding="utf-8")) for f in files]
 
 
-def composition(cases: list[dict]) -> collections.Counter:
-    return collections.Counter(c.get("difficulty") for c in cases)
+def patch_subset(cases: list[dict]) -> list[dict]:
+    """The patch filter exactly as implemented upstream.
 
-
-def weighted(strata, comp: collections.Counter, n: int) -> float:
-    """Recompute an 'All' column as the case-count-weighted mean of its strata."""
-    return sum(s * comp[d] for s, d in zip(strata, DIFFS)) / n if n else 0.0
+    src/scripts/1_benchmark/benchmark.py, _generate_tasks(): fixable is True,
+    has_public_source is True, normal_txs non-empty. The paper describes the
+    starting set as "153 proxy cases"; the code never consults proxy_address.
+    """
+    return [c for c in cases if c.get("fixable") is True
+            and c.get("has_public_source") is True and c.get("normal_txs")]
 
 
 def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
@@ -124,179 +142,240 @@ def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
     return ((centre - half) / den, (centre + half) / den)
 
 
-def patch_subset(cases: list[dict]) -> list[dict]:
-    """The patch filter exactly as implemented in src/scripts/1_benchmark/benchmark.py.
+def near_int(x: float, tol: float) -> int | None:
+    r = round(x)
+    return int(r) if abs(x - r) <= tol else None
 
-    Note this is NOT the filter the paper describes: the paper says the subset
-    starts from "153 proxy cases", but the code keys on `fixable` and never
-    consults `proxy_address`.
-    """
-    return [
-        c for c in cases
-        if c.get("fixable") is True
-        and c.get("has_public_source") is True
-        and c.get("normal_txs")
-    ]
 
+# ----------------------------------------------------------------------------
+# checks
+# ----------------------------------------------------------------------------
 
 def main() -> int:
-    ap = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
-    ap.add_argument(
-        "--cases",
-        default="CyberChainBench/data/benchmark/cases",
-        help="path to data/benchmark/cases in the official repo",
-    )
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--upstream", default="CyberChainBench",
+                    help="path to a clone of defai-labs/CyberChainBench at commit 1cb7410")
+    ap.add_argument("--data", default=os.path.join(HERE, "data"),
+                    help="directory holding paper-table-4.csv and paper-table-5.csv")
     args = ap.parse_args()
 
-    cases = load_cases(args.cases)
+    cases_dir = os.path.join(args.upstream, "data", "benchmark", "cases")
+    t4p = os.path.join(args.data, "paper-table-4.csv")
+    t5p = os.path.join(args.data, "paper-table-5.csv")
+    for p in (cases_dir, t4p, t5p):
+        if not os.path.exists(p):
+            print(f"missing input: {p}", file=sys.stderr)
+            return 1
+    cases = load_cases(cases_dir)
+    if not cases:
+        print(f"no case files under {cases_dir}", file=sys.stderr)
+        return 1
+    t4 = read_table4(t4p)
+    t5 = read_table5(t5p)
+    t5_by = {canon(k): v for k, v in t5.items()}
+    NP = PAPER["patch_subset"]  # the paper's denominator for its own patch percentages
     r = Report()
-    print(f"CyberChainBench audit -- {len(cases)} case files read from {args.cases}\n")
+    print(f"CyberChainBench audit: {len(cases)} case files from {cases_dir}, "
+          f"{len(t4)} configurations from Table 4\n")
 
-    # --- 1. dataset size ----------------------------------------------------
-    r.add(
-        PASS if len(cases) == PAPER_TOTAL_CASES else FAIL,
-        "dataset size",
-        f"paper says {PAPER_TOTAL_CASES} incidents; release ships {len(cases)}",
-    )
+    # 1. dataset size ------------------------------------------------------
+    r.add(PASS if len(cases) == PAPER["total_cases"] else FAIL, "dataset size",
+          f"paper: {PAPER['total_cases']} incidents; release ships {len(cases)} case files")
 
-    # --- 2. patch subset reconstruction ------------------------------------
-    pre = [c for c in cases if c.get("fixable") is True]
+    # 2. patch subset reconstruction ----------------------------------------
+    fixable = [c for c in cases if c.get("fixable") is True]
     patch = patch_subset(cases)
-    comp = composition(patch)
     n = len(patch)
-    with_proxy = len([c for c in patch if c.get("proxy_address")])
-    r.add(
-        PASS if len(pre) == PAPER_PRE_FILTER else FAIL,
-        "patch subset, pre-filter stage",
-        f"paper: '{PAPER_PRE_FILTER} proxy cases'; `fixable is True` yields {len(pre)}. "
-        f"The count matches but the label does not: the code filters on `fixable` and "
-        f"never consults `proxy_address` (requiring a proxy would give {with_proxy}).",
-    )
-    r.add(
-        PASS if n == PAPER_PATCH_SUBSET else FAIL,
-        "patch subset size",
-        f"paper: {PAPER_PATCH_SUBSET} cases; the code filter reproduces {n} "
-        f"(easy {comp['easy']}, medium {comp['medium']}, hard {comp['hard']})",
-    )
+    comp = collections.Counter(c.get("difficulty") for c in patch)
+    unknown = [c["id"] for c in patch if c.get("difficulty") not in DIFFS]
+    with_proxy = sum(1 for c in patch if c.get("proxy_address"))
+    r.add(PASS if len(fixable) == PAPER["pre_filter"] else FAIL, "patch subset, pre-filter stage",
+          f"paper: '{PAPER['pre_filter']} proxy cases'; `fixable is True` yields {len(fixable)}. "
+          f"The count matches; the label does not. The code never consults proxy_address "
+          f"({with_proxy} of the final {n} have one).")
+    r.add(PASS if n == PAPER["patch_subset"] else FAIL, "patch subset size",
+          f"paper: {PAPER['patch_subset']}; the code's filter gives {n}: easy {comp['easy']}, "
+          f"medium {comp['medium']}, hard {comp['hard']}, plus {len(unknown)} labelled "
+          f"'unknown' ({', '.join(unknown) or 'none'}) that sit in no difficulty column")
 
-    # --- 3. are the published 'All' columns internally consistent? ---------
-    bad = []
-    for cfg, strata in TABLE3_PATCH.items():
-        got = weighted(strata[1:], comp, n)
-        if abs(got - strata[0]) > 0.15:
-            bad.append((cfg, strata[0], got))
-    gpt55 = weighted(TABLE3_PATCH["Codex x GPT-5.5"][1:], comp, n)
-    detail = (
-        f"Table 3 'Patch All' recomputed from its own Easy/Med/Hard cells over the "
-        f"reconstructed {n}-case composition: {len(TABLE3_PATCH) - len(bad)}/"
-        f"{len(TABLE3_PATCH)} configurations reproduce to within 0.15pp "
-        f"(GPT-5.5: {gpt55:.2f} vs published 23.4)"
-    )
-    if bad:
-        detail += ". Off: " + "; ".join(
-            f"{c} published {p} vs recomputed {g:.2f}" for c, p, g in bad
-        )
-    r.add(PASS if len(bad) <= 1 else FAIL, "Table 3 self-consistency", detail)
+    # 3. Table 4 patch column is made of whole cases ------------------------
+    # Every cell is (passes / stratum size) rounded to 0.1, so passes must be
+    # near-integer. The unknown-difficulty cases have no column; whatever the
+    # 'All' cell holds beyond the three strata must fit inside them.
+    ok, lines = 0, []
+    for cfg, v in t4.items():
+        a, e, m, h = v["patch"]
+        parts = [near_int(x * k / 100, 0.06) for x, k in ((e, comp["easy"]), (m, comp["medium"]), (h, comp["hard"]))]
+        total = near_int(a * n / 100, 0.06)
+        good = None not in parts and total is not None and 0 <= total - sum(parts) <= len(unknown)
+        ok += good
+        if not good or total - (sum(parts) if None not in parts else 0) > 0:
+            lines.append(f"{cfg}: All={total}/{n}, strata={parts}"
+                         + (f", {total - sum(parts)} pass among the {len(unknown)} unknown" if good else " DOES NOT FIT"))
+    r.add(PASS if ok == len(t4) else FAIL, "Table 4 patch cells are whole-case counts",
+          f"{ok}/{len(t4)} configurations resolve to integer passes per stratum, with the "
+          f"remainder inside the {len(unknown)} unknown-difficulty cases. "
+          + ("; ".join(lines) if lines else "No configuration needs an unknown-case pass."))
 
-    # --- 4. Table 3 'All' vs Table 5 'Pass' --------------------------------
-    mismatch = [
-        (cfg, TABLE3_PATCH[cfg][0], TABLE5_BLOCK_PASS[cfg][1])
-        for cfg in TABLE3_PATCH
-        if abs(TABLE3_PATCH[cfg][0] - TABLE5_BLOCK_PASS[cfg][1]) > 1e-9
-    ]
-    if not mismatch:
-        r.add(PASS, "Table 3 'All' == Table 5 'Pass'",
-              "identity holds for all configurations")
+    # 4. Table 4 'All' vs Table 5 'Pass' ------------------------------------
+    mism, non_k94 = [], []
+    for cfg, v in t4.items():
+        row = t5_by.get(canon(cfg))
+        if row is None:
+            continue
+        if abs(v["patch"][0] - row["pass"]) > 1e-9:
+            mism.append(f"{cfg}: Table 4 {v['patch'][0]} vs Table 5 {row['pass']}")
+        for label in ("block", "pass"):
+            if near_int(row[label] * NP / 100, 0.06) is None:
+                non_k94.append(f"{cfg} {label} {row[label]}")
+    r.add(FAIL if mism or non_k94 else PASS, "Table 4 'All' vs Table 5 'Pass %'",
+          f"the two columns report the same quantity and agree for "
+          f"{len(t4) - len(mism)}/{len(t4)} configurations. Disagree: {'; '.join(mism) or 'none'}. "
+          f"Table 5 cells that are not k/{NP} for any integer k: {'; '.join(non_k94) or 'none'}. "
+          f"We call this an inconsistency, not a known typo: the GPT-5.2 pair also fits k/57, "
+          f"so a different denominator is as plausible as a transcription error.")
+
+    # 5. three different 'best patch' statements ----------------------------
+    best_cfg, best = max(((c, v["patch"][0]) for c, v in t4.items()), key=lambda t: t[1])
+    claims = {PAPER["best_patch_text"], PAPER["best_patch_abstract"], best}
+    r.add(FAIL if len(claims) > 1 else PASS, "'best patch' statements",
+          f"the paper names three different best patch scores: {PAPER['best_patch_text']} "
+          f"(section 4, 'Opus 4.7 leads on patch pass rate'), {PAPER['best_patch_abstract']} "
+          f"(abstract and section 4, 'the best patch pass rate'), and {best} for {best_cfg} "
+          f"in Table 4. The same section 4 sentence names Opus 4.7 the realized-profit leader "
+          f"at $45.5M while the abstract and Table 5 give $57.4M to GPT-5.5. A stale results "
+          f"paragraph is the likely cause; that is a hypothesis.")
+
+    # 6. the authors' own leaderboard vs the paper --------------------------
+    lb_path = os.path.join(args.upstream, "site", "assets", "leaderboard.json")
+    if os.path.exists(lb_path):
+        lb = json.load(open(lb_path, encoding="utf-8"))
+        t4_by = {canon(k): v for k, v in t4.items()}
+        diffs, same = [], 0
+        seen = set()
+        for row in lb:
+            key = canon(f"{row.get('agent', '')}-{row.get('model', '')}")
+            if key not in t4_by:
+                continue
+            seen.add(key)
+            paper_v = t4_by[key][row["task"]][0]
+            site_v = round(100 * float(row["mean"]), 1)
+            if abs(paper_v - site_v) > 0.15:
+                diffs.append(f"{key} {row['task']}: paper {paper_v} vs site {site_v} (site n={row['n']})")
+        bad_cfgs = {d.split()[0] for d in diffs}
+        r.add(FAIL if diffs else PASS, "paper Table 4 vs the leaderboard shipped in the same repo",
+              f"comparing like for like (leaderboard mean x 100 against Table 4 'All', both "
+              f"average reward), {len(bad_cfgs)} of {len(seen)} configurations disagree on at "
+              f"least one task: " + "; ".join(diffs) + ". The site builder says the Codex rows "
+              f"were carried over from an older leaderboard. The GPT-5.5 headline cells "
+              f"(43.7, 23.4) match.")
     else:
-        r.add(
-            FAIL,
-            "Table 3 'All' vs Table 5 'Pass'",
-            f"identity holds for {len(TABLE3_PATCH) - len(mismatch)}/{len(TABLE3_PATCH)} "
-            f"configurations but breaks for: "
-            + "; ".join(f"{c}: Table 3 {a} vs Table 5 {b}" for c, a, b in mismatch)
-            + ". Table 3's value is the one consistent with its own strata, so the Table 5 "
-              "cell appears to be the transcription error (it duplicates that row's "
-              "exploit score).",
-        )
+        r.add(INFO, "leaderboard comparison", f"skipped: {lb_path} not found")
 
-    # --- 5. the "best patch pass rate" claim -------------------------------
-    best_cfg, best = max(((c, v[0]) for c, v in TABLE3_PATCH.items()), key=lambda t: t[1])
-    r.add(
-        PASS if abs(best - PAPER_BEST_PATCH_CLAIM) < 0.05 else FAIL,
-        "'best patch pass rate' claim",
-        f"body text asserts the best patch pass rate is {PAPER_BEST_PATCH_CLAIM}%, but the "
-        f"highest Patch All printed in Table 3 is {best}% ({best_cfg}) -- and that cell is "
-        f"self-consistent with its own strata. Note {best_cfg} scores "
-        f"{TABLE3_EXPLOIT[best_cfg][0]}% on exploit, i.e. for this configuration patching "
-        f"outscores exploiting and the 'clear difficulty gradient' inverts.",
-    )
+    # 7. how much does subset composition move the gap? ---------------------
+    full = collections.Counter(c.get("difficulty") for c in cases)
+    def reweight(cells, counts):
+        k = sum(counts[d] for d in DIFFS)
+        return sum(x * counts[d] for x, d in zip(cells[1:], DIFFS)) / k
+    moves = []
+    for cfg, v in t4.items():
+        g_patch_comp = reweight(v["exploit"], comp) - reweight(v["patch"], comp)
+        g_full = reweight(v["exploit"], full) - reweight(v["patch"], full)
+        moves.append((cfg, abs(g_full - g_patch_comp)))
+    lo_m, hi_m = min(m for _, m in moves), max(m for _, m in moves)
+    g55 = dict(moves)["Codex GPT-5.5"]
+    r.add(INFO, "does the patch subset's harder mix explain the gap?",
+          f"the patch subset is harder than the corpus ({100 * comp['hard'] / n:.1f}% hard vs "
+          f"{100 * full['hard'] / len(cases):.1f}%). Re-weighting both tasks' strata to the same "
+          f"difficulty mix moves the exploit-minus-patch gap by {g55:.2f}pp for GPT-5.5 and "
+          f"{lo_m:.2f}-{hi_m:.2f}pp across all ten configurations. Composition is not the "
+          f"explanation. (Unknown-difficulty cases are left out of both re-weightings.)")
 
-    # --- 6. is the gap explained by subset composition? --------------------
-    full = composition(cases)
-    pe = weighted(TABLE3_EXPLOIT["Codex x GPT-5.5"][1:], comp, n)
-    pp = weighted(TABLE3_PATCH["Codex x GPT-5.5"][1:], comp, n)
-    fe = weighted(TABLE3_EXPLOIT["Codex x GPT-5.5"][1:], full, len(cases))
-    fp = weighted(TABLE3_PATCH["Codex x GPT-5.5"][1:], full, len(cases))
-    r.add(
-        INFO,
-        "difficulty-matching the two headline numbers",
-        f"the patch subset is harder than the corpus ({100*comp['hard']/n:.1f}% hard vs "
-        f"{100*full['hard']/len(cases):.1f}%), but matching composition barely moves "
-        f"anything: on the {n}-case composition exploit {pe:.1f} vs patch {pp:.1f} "
-        f"(gap {pe-pp:.1f}pp); on all {len(cases)} cases exploit {fe:.1f} vs patch "
-        f"{fp:.1f} (gap {fe-fp:.1f}pp). Subset composition accounts for ~2pp of the ~20pp "
-        f"headline gap, so it is NOT the explanation.",
-    )
+    # 8. uncertainty on the headline numbers --------------------------------
+    k_patch = round(t4["Codex GPT-5.5"]["patch"][0] * NP / 100)
+    lo, hi = wilson(k_patch, NP)
+    k_block = round(t5_by["gpt-5.5"]["block"] * NP / 100)
+    r.add(INFO, "uncertainty the paper does not report",
+          f"patch 23.4% is {k_patch}/{NP}, Wilson 95% CI [{100 * lo:.1f}, {100 * hi:.1f}]. "
+          f"Block 47.9% is {k_block}/{NP}. Exploit 43.7% is a mean of a clamped continuous "
+          f"score over an unpublished 200-case set, so no per-case interval can be built from "
+          f"the release. Detect is a binary exact match over 541 cases. The three abstract "
+          f"numbers are three different estimands on three case sets; the paper defines each "
+          f"reward but never says they are not comparable.")
 
-    # --- 7. what the two metrics actually are ------------------------------
-    blk, pss = TABLE5_BLOCK_PASS["Codex x GPT-5.5"]
-    r.add(
-        INFO,
-        "the two headline numbers are different estimands",
-        f"exploit = mean of min(profit/reference, 1.0), a clamped continuous score with "
-        f"best-of-N retries, over 200 cases; patch = mean of "
-        f"1[exploit blocked]*1[normal txs pass], a binary conjunction, over {n} cases. "
-        f"The paper's own split shows the second conjunct is what costs the score: {blk}% "
-        f"of patches block the exploit but only {pss}% also preserve normal operation, i.e. "
-        f"{100*(blk-pss)/blk:.0f}% of blocking patches break legitimate callers "
-        f"(Gemini 3.1 Pro: blocks 98.9%, passes 1.1%). Block rate on its own is NOT a fair "
-        f"comparator -- a patch that simply reverts scores ~100% on it -- so this "
-        f"decomposition explains the gap's mechanism without overturning the ordering.",
-    )
+    # 9. block vs pass ------------------------------------------------------
+    blk, pss = t5_by["gpt-5.5"]["block"], t5_by["gpt-5.5"]["pass"]
+    r.add(INFO, "what the block/pass split does and does not show",
+          f"for GPT-5.5, {blk}% of patches pass the blocking check and {pss}% also pass the "
+          f"normal-operation check. The second check is byte equality of success flag, return "
+          f"data hash and full log hash on 1-5 historical calls (validate_patch.py:1326-1333 at "
+          f"{UPSTREAM_COMMIT}), so the gap is an upper bound on 'breaks legitimate callers', not "
+          f"a measurement of it: a correct fix that changes an amount or an event also fails. "
+          f"Block rate alone is not a fair comparator either: a bare revert() patch passes it.")
 
-    # --- 8. temporal split and the contamination slice ---------------------
+    # 10. temporal split and what it implies about the exploit set ----------
     post = [c for c in cases if (c.get("attack_date") or "") >= CUTOFF]
-    r.add(
-        PASS if len(post) == PAPER_POST_CUTOFF else FAIL,
-        "temporal split",
-        f"paper: {PAPER_POST_CUTOFF} cases dated 2025+ and {PAPER_PRE_CUTOFF} before; "
-        f"release reproduces {len(post)} / {len(cases) - len(post)}",
-    )
+    r.add(PASS if len(post) == PAPER["post_cutoff"] else FAIL, "temporal split",
+          f"paper: {PAPER['post_cutoff']} cases dated 2025+ and {PAPER['pre_cutoff']} before; "
+          f"release gives {len(post)} / {len(cases) - len(post)}")
+    pre_s, post_s = PAPER["opus47_exploit_pre"], PAPER["opus47_exploit_post"]
+    all_s = t4["Claude Code Opus 4.7"]["exploit"][0]
+    x = PAPER["exploit_n"] * (pre_s - all_s) / (pre_s - post_s)
+    prop = PAPER["exploit_n"] * len(post) / len(cases)
+    corpus_mix = (pre_s * (len(cases) - len(post)) + post_s * len(post)) / len(cases)
+    r.add(FAIL, "the Opus 4.7 temporal numbers vs the exploit set",
+          f"the paper gives Opus 4.7 exploit {pre_s}% pre-cutoff and {post_s}% post-cutoff, and "
+          f"{all_s}% over the 200-case exploit set. For those three to be one weighted mean, the "
+          f"exploit set must hold about {x:.0f} post-cutoff cases, nearly all {len(post)} in the "
+          f"corpus, against ~{prop:.0f} for a proportional draw. Over the corpus mix the same "
+          f"split would give {corpus_mix:.1f}%. Either the exploit set is heavily skewed toward "
+          f"recent incidents without saying so, or the split and the 'All' cell come from "
+          f"different populations. The release cannot settle which.")
 
     post_patch = [c for c in patch if (c.get("attack_date") or "") >= CUTOFF]
     k = len(post_patch)
-    lo, hi = wilson(round(0.234 * k), k) if k else (0.0, 0.0)
-    r.add(
-        FAIL,
-        "statistical power of the patch contamination slice",
-        f"the paper reports pre/post-cutoff patch gaps of '2-6 points', but only {k} of the "
-        f"{n} patch cases post-date the model cutoffs. On {k} binary trials one case moves "
-        f"the score by {100/k:.1f}pp and a 95% Wilson interval around ~23% spans "
-        f"[{100*lo:.0f}, {100*hi:.0f}]% -- roughly {100*(hi-lo):.0f}pp wide. A 2-6 point "
-        f"difference is not distinguishable from noise at this sample size, so the paper's "
-        f"contamination control for patching is underpowered by construction.",
-    )
+    lo9, hi9 = wilson(round(0.234 * k), k) if k else (0.0, 0.0)
+    r.add(INFO, "the patch side of the contamination control",
+          f"only {k} of the {n} patch cases post-date the cutoff. The paper prints no post-cutoff "
+          f"patch number at all; if it did, one case would move it by {100 / k:.1f}pp and a "
+          f"95% interval around ~23% would span [{100 * lo9:.0f}, {100 * hi9:.0f}]%. The patch "
+          f"half of the 'exploit and patch show smaller gaps of 2-6 points' sentence has no "
+          f"published number behind it.")
+
+    # 11. curator flags that no code reads ----------------------------------
+    # A case counts as curator-flagged if any of the four fields the curators
+    # used says so: `disputed`, `_skip_reason`, a `_review_note` starting with
+    # DISPUTED, or `notes` starting with SKIP/Disputed. None is read by src/.
+    def flagged_case(c: dict) -> bool:
+        note = str(c.get("notes", "")).strip().lower()
+        return bool(c.get("disputed") or c.get("_skip_reason")
+                    or str(c.get("_review_note", "")).strip().upper().startswith("DISPUTED")
+                    or note.startswith("skip") or note.startswith("disputed"))
+    flagged = [c["id"] for c in cases if flagged_case(c)]
+    in_patch = [c for c in flagged if c in {p["id"] for p in patch}]
+    r.add(INFO, "curator-flagged cases are still scored",
+          f"{len(flagged)} cases carry a curator flag saying disputed or skip "
+          f"({', '.join(flagged)}); no code under src/ or site/ reads those fields. In the "
+          f"patch subset: {', '.join(in_patch) or 'none'}. Dropping them moves any patch rate by "
+          f"at most {100 * len(in_patch) / n:.1f}pp. bench-53 (Ronin) and bench-428 (OrbitChain) "
+          f"are flagged by the curators as key compromises, not code bugs.")
+
+    # 12. what a patch run would cost --------------------------------------
+    costs = sorted((v["patch_cost"], k_) for k_, v in t5.items())
+    g55c = t5_by["gpt-5.5"]["patch_cost"]
+    r.add(INFO, "cost of re-running the patch task with a model",
+          f"Table 5 patch cost per case ranges ${costs[0][0]:.2f} ({costs[0][1]}) to "
+          f"${costs[-1][0]:.2f} ({costs[-1][1]}); GPT-5.5 is ${g55c:.2f}. On {n} cases that is "
+          f"${costs[0][0] * NP:.0f} to ${costs[-1][0] * NP:,.0f} per configuration, ~${g55c * NP:.0f} "
+          f"for the headline configuration. Model-free oracle controls cost only RPC time.")
 
     r.summary()
-    print()
-    print("Bottom line: the headline numbers 43.7 / 23.4 are exactly as published, and the")
-    print("patch subset, its arithmetic and the temporal split all reproduce from the public")
-    print("release. What does not hold up is the precision claimed around them: the two")
-    print("numbers are different estimands, the 'best patch pass rate' sentence contradicts")
-    print("Table 3, one Table 5 cell is wrong, and the contamination slice for patching")
-    print("rests on 9 cases. The qualitative ordering -- patching is hardest -- survives.")
+    print("\nBottom line: the release reproduces the paper's data construction and its patch")
+    print("arithmetic. It does not let anyone check 43.7, it ships a leaderboard that disagrees")
+    print("with the paper, and the paper contradicts itself on the best patch score. Whether the")
+    print("patch oracle measures 'a correct fix' is a separate, open question: it tests byte")
+    print("equality and has never been calibrated against gold patches or no-op patches.")
     return 0
 
 

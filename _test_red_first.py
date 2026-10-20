@@ -1,24 +1,35 @@
 #!/usr/bin/env python3
-"""Red-first guard: the audit's PASS checks must turn red on corrupted data.
+"""Red-first guard: every PASS check in the audit must turn red on corrupted data.
 
-A check that cannot fail proves nothing. This deliberately breaks the dataset in
-three independent ways and asserts the corresponding check flips to DISCREPANCY.
+A check that cannot fail proves nothing. This copies the upstream case files
+and the parsed paper tables into a temp dir, breaks them in four independent
+ways, and asserts that the matching check flips to DISCREPANCY.
+
+Usage:
+    python3 _test_red_first.py --upstream CyberChainBench
+Exit 0 = every mutation went red. Exit 1 = some check stayed green (or the
+baseline was not green to begin with).
+рельса: local python, no LLM.
 """
+from __future__ import annotations
+
+import argparse
+import csv
 import json
+import os
 import pathlib
 import shutil
 import subprocess
 import sys
 import tempfile
 
-HERE = pathlib.Path(__file__).resolve().parent
+HERE = pathlib.Path(os.path.realpath(__file__)).parent
 AUDIT = HERE / "verify_cyberchainbench.py"
-CASES = (HERE / ".." / "repo" / "data" / "benchmark" / "cases").resolve()
 
 
-def run(cases_dir):
+def run(upstream: pathlib.Path, data: pathlib.Path) -> dict[str, str]:
     out = subprocess.run(
-        [sys.executable, str(AUDIT), "--cases", str(cases_dir)],
+        [sys.executable, str(AUDIT), "--upstream", str(upstream), "--data", str(data)],
         capture_output=True, text=True, check=True,
     ).stdout
     status = {}
@@ -30,43 +41,48 @@ def run(cases_dir):
     return status
 
 
-def corrupt(dst, mutate):
-    shutil.copytree(CASES, dst)
-    files = sorted(dst.glob("*.json"))
-    mutate(files)
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--upstream", default="CyberChainBench")
+    args = ap.parse_args()
+    upstream = pathlib.Path(args.upstream).resolve()
+    data = HERE / "data"
+    cases = upstream / "data" / "benchmark" / "cases"
+    if not cases.is_dir():
+        print(f"no cases under {cases}; clone the upstream first", file=sys.stderr)
+        return 1
 
-
-def main():
-    baseline = run(CASES)
-    print("baseline:", {k: v for k, v in baseline.items()})
-    expected_pass = [
-        "dataset size",
-        "patch subset size",
-        "temporal split",
-        "patch subset, pre-filter stage",
-    ]
-    for name in expected_pass:
-        assert baseline.get(name) == "PASS", f"baseline should be PASS for {name!r}"
+    baseline = run(upstream, data)
+    must_pass = ["dataset size", "patch subset size", "temporal split",
+                 "patch subset, pre-filter stage", "Table 4 patch cells are whole-case counts"]
+    for name in must_pass:
+        if baseline.get(name) != "PASS":
+            print(f"baseline is not PASS for {name!r}: {baseline.get(name)}")
+            return 1
+    print("baseline green on:", ", ".join(must_pass))
 
     failures = []
 
-    def check(label, target, mutate):
+    def check(label: str, target: str, mutate_cases=None, mutate_data=None) -> None:
         with tempfile.TemporaryDirectory() as td:
-            dst = pathlib.Path(td) / "cases"
-            corrupt(dst, mutate)
-            got = run(dst)
-            ok = got.get(target) == "DISCREPANCY"
-            print(f"  {'RED ok ' if ok else 'STAYED GREEN'}  {label} -> {target!r}: {got.get(target)}")
+            td = pathlib.Path(td)
+            up = td / "up"
+            shutil.copytree(cases, up / "data" / "benchmark" / "cases")
+            dd = td / "data"
+            shutil.copytree(data, dd)
+            if mutate_cases:
+                mutate_cases(sorted((up / "data" / "benchmark" / "cases").glob("*.json")))
+            if mutate_data:
+                mutate_data(dd)
+            got = run(up, dd).get(target)
+            ok = got == "DISCREPANCY"
+            print(f"  {'RED ok      ' if ok else 'STAYED GREEN'}  {label} -> {target!r}: {got}")
             if not ok:
-                failures.append((label, target, got.get(target)))
+                failures.append((label, target, got))
 
-    print("\nred-first mutations:")
+    def drop_one(files):
+        files[0].unlink()
 
-    # 1. drop a case file -> dataset size must go red
-    check("delete one case file", "dataset size",
-          lambda files: files[0].unlink())
-
-    # 2. flip a `fixable` flag -> patch subset size must go red
     def unfix(files):
         for f in files:
             d = json.loads(f.read_text())
@@ -74,25 +90,38 @@ def main():
                 d["fixable"] = False
                 f.write_text(json.dumps(d))
                 return
-        raise AssertionError("no patch-subset case found to mutate")
-    check("flip one `fixable` to False", "patch subset size", unfix)
+        raise AssertionError("no patch-subset case to mutate")
 
-    # 3. move a 2024 incident into 2025 -> temporal split must go red
     def redate(files):
         for f in files:
             d = json.loads(f.read_text())
-            if (d.get("attack_date") or "").startswith("2024"):
+            if str(d.get("attack_date", "")).startswith("2024"):
                 d["attack_date"] = "2025-06-01"
                 f.write_text(json.dumps(d))
                 return
-        raise AssertionError("no 2024 case found to mutate")
-    check("re-date one 2024 incident to 2025", "temporal split", redate)
+        raise AssertionError("no 2024 case to mutate")
+
+    def bend_table4(dd: pathlib.Path):
+        p = dd / "paper-table-4.csv"
+        rows = list(csv.reader(p.open(encoding="utf-8")))
+        for r in rows:
+            if r[0] == "Codex GPT-5.5":
+                r[10] = "21.0"   # patch Easy 19.4 -> 21.0: 31 x 21.0% = 6.51 passes, not a whole case
+        with p.open("w", newline="", encoding="utf-8") as f:
+            csv.writer(f).writerows(rows)
+
+    print("\nmutations:")
+    check("delete one case file", "dataset size", mutate_cases=drop_one)
+    check("flip one `fixable` to False", "patch subset size", mutate_cases=unfix)
+    check("re-date one 2024 incident to 2025", "temporal split", mutate_cases=redate)
+    check("bend one Table 4 patch cell off the k/n grid",
+          "Table 4 patch cells are whole-case counts", mutate_data=bend_table4)
 
     print()
     if failures:
-        print("FAILED -- these checks could not be made to fail:", failures)
+        print("FAILED: these checks could not be made to fail:", failures)
         return 1
-    print("all mutations produced red: the PASS checks are load-bearing, not vacuous.")
+    print("every mutation went red: the PASS checks are load-bearing.")
     return 0
 
 
