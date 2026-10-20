@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""forge shim: runs the official foundry docker image (Intel Mac, no brew libusb).
+
+Upstream passes `--use /Users/<me>/.solcx/solc-vX.Y.Z` (a macOS binary). Inside the Linux
+container that path does not exist, so we rewrite it to a Linux solc fetched from the
+official binaries.soliditylang.org list and mounted at /solcx.
+"""
+import json
+import os
+import re
+import stat
+import subprocess
+import sys
+import urllib.request
+from pathlib import Path
+
+IMAGE = os.environ.get("CCB_FOUNDRY_IMAGE", "ghcr.io/foundry-rs/foundry:v1.8.5")
+SOLC_DIR = Path(os.environ.get("CCB_SOLC_LINUX_DIR", str(Path.home() / "ccb" / "solc-linux")))
+ROOT = os.environ.get("CCB_ROOT", str(Path.home() / "ccb"))
+BASE = "https://binaries.soliditylang.org/linux-amd64/"
+
+
+def urlopen(url, timeout):
+    req = urllib.request.Request(url, headers={"User-Agent": "ccb-calib"})
+    return urllib.request.urlopen(req, timeout=timeout)
+
+
+def linux_solc(version: str) -> str:
+    SOLC_DIR.mkdir(parents=True, exist_ok=True)
+    target = SOLC_DIR / f"solc-v{version}"
+    if not target.exists():
+        lst = json.load(urlopen(BASE + "list.json", 60))
+        name = lst["releases"][version]
+        tmp = target.with_suffix(".part")
+        tmp.write_bytes(urlopen(BASE + name, 300).read())
+        tmp.chmod(tmp.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        tmp.rename(target)
+    return f"/solcx/solc-v{version}"
+
+
+args = sys.argv[1:]
+for i, a in enumerate(args[:-1]):
+    if a == "--use":
+        m = re.search(r"solc-v(\d+\.\d+\.\d+)$", args[i + 1])
+        if m:
+            args[i + 1] = linux_solc(m.group(1))
+cmd = [
+    "docker", "run", "--rm", "-i",
+    "-v", f"{ROOT}:{ROOT}", "-w", os.getcwd(),
+    "-v", f"{SOLC_DIR}:/solcx:ro",
+    "-v", "ccb-svm:/root/.svm", "-v", "ccb-foundry:/root/.foundry",
+    "-e", "ETH_RPC_URL", "-e", "MAINNET_RPC_URL",
+    "--entrypoint", "forge", IMAGE, *args,
+]
+sys.exit(subprocess.run(cmd).returncode)

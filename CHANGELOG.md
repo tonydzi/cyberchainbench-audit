@@ -1,5 +1,25 @@
 # Changelog
 
+## v2.1, 2026-10-20
+
+First measurement of the patch oracle, no model involved: [calibration/RESULTS.md](calibration/RESULTS.md).
+
+- 8 Ethereum cases x 3 inputs (unchanged, `revert()`, emit-only) through the upstream `validate_patch` CLI at
+  `1cb7410`, forks via the free `eth.drpc.org`, forge 1.8.5 (official image), sources from Sourcify.
+- 3 cases usable: a fix-nothing input scored 1.0 once per input (bench-391 revert and emit-only, bench-76
+  unchanged). 5 cases could not discriminate (bench-247 compiled the wrong contract; bench-322, 410 and 05 do not
+  reproduce the attack before patching; bench-449's only normal tx is a contract creation).
+- Observed: an RPC failure inside the oracle's score replay read as "exploit still passes" (score 0.0 instead of
+  1.0 for the same patch); `proxy_address: null` crashes the attack replay (`attack_replay.py:259`); the
+  recompile step hard-codes optimizer runs 200 (`legacy.py:226`) while real settings differ.
+- Second pass in a fresh clone reproduced bench-391 (unchanged 0.0, revert 1.0, emit-only 1.0 after one RPC retry).
+- `parse_runs.py` derives every number from raw forge logs; `_test_parse_runs.py` (11 checks) shows it turning red
+  on damaged logs.
+- Not done: reference fixes, the remaining 47 Ethereum cases, an Etherscan-sourced run, BSC, the Harbor verifier.
+  We tried the Docker route first: the daemon was off and was started; the macOS forge release needed `libusb`,
+  so the Docker image is used through a shim.
+- README: "Scope", "What the patch oracle actually tests" and "The next measurement" updated.
+
 ## v2, 2026-10-20
 
 A second review (see [FINDINGS.md](FINDINGS.md)) found errors in v1 of this audit and new
