@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.1.1, 2026-10-22
+
+- Article (EN and RU) now carries the calibration as "Pass four" and no longer says that nothing was measured; "What the numbers can and cannot say" moved after it.
+- Every figure in pass four was re-checked by the consolidating session against the raw forge logs, `bytecode_diff.jsonl`, the upstream code at `1cb7410` and Sourcify (bench-76: 999,999 optimizer runs, `london`). New in that check: the hard-coded `optimizer: runs 200` in `compile_dfhl_fixed_bytecode` (`legacy.py:226`) is called by the scoring path too (`evaluator.py:741`), not only by the CLI we ran.
+- Wording corrected after an external fact-check (Codex): "could not discriminate any patch" became "gave the same score to all three inputs"; "harmless" became "adds an event, no logic change"; bench-559's `proxy_address: null` workaround is now stated where the case is counted as usable; the provenance of each figure (forge logs vs bytecode diff vs Sourcify) is named.
+
 ## v2.1, 2026-10-20
 
 First measurement of the patch oracle, no model involved: [calibration/RESULTS.md](calibration/RESULTS.md).

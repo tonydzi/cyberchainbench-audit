@@ -16,7 +16,7 @@ Arms (built by `make_arms.py` from the verified source of the labelled vulnerabl
 | case | usable? | unchanged | revert | emit_only | what the logs show |
 | --- | --- | --- | --- | --- | --- |
 | bench-391 BBT | yes | 0.0 | **1.0** | **1.0** | revert zeroes the attacker's profit. emit_only keeps the **full** profit (`AFTER_PROFIT == BEFORE_PROFIT`) and is still "blocked", because the extra event changes the log hash. Normal replay 1/1 preserved: that call never touches `setRegistry`. |
-| bench-559 ChiSale | yes, after a workaround | 0.0 | 0.0 | 0.0 | unchanged is not blocked and preserved 1/1 (correct). revert: blocked, normal fails (`success changed`). emit_only: blocked via log hash, normal fails (`logs changed`): **a harmless added event fails the normal replay on the function it touches**. Needs `proxy_address: null` removed, see below. |
+| bench-559 ChiSale | yes, after a workaround | 0.0 | 0.0 | 0.0 | unchanged is not blocked and preserved 1/1 (correct). revert: blocked, normal fails (`success changed`). emit_only: blocked via log hash, normal fails (`logs changed`): **an added event, with no logic change, fails the normal replay on the function it touches**. Needs `proxy_address: null` removed, see below. |
 | bench-76 HYPR | yes | **1.0** | 0.0 | 0.0 | the **unchanged** source is "blocked" (profit 2.57e24 to 0) and normal replay 1/1 preserved, so it scores full marks. The compiled runtime is 8490 bytes against 11380 on chain. revert and emit_only fail the normal replay (`success changed`, `logs changed`). |
 | bench-247 Dexible | no (harness) | 0.0 | 0.0 | 0.0 | identical gas in all three arms (576446). The compile step etched a contract named `ERC20` (2130 bytes) over a target that is 18475 bytes on chain; every arm is "blocked" and every normal replay fails (`success changed`). |
 | bench-322 Lifiprotocol | no (baseline) | 0.0 | 0.0 | 0.0 | attack replay fails before any patch: `Contract 0x986a... does not exist and is not marked as persistent`. No patch could score. |
@@ -26,7 +26,7 @@ Arms (built by `make_arms.py` from the verified source of the labelled vulnerabl
 
 Counts: a fix-nothing input scored 1.0 in **1 of 3 usable cases per input** (unchanged: bench-76; revert:
 bench-391; emit_only: bench-391). Scores above 0 appeared in 2 of the 3 usable cases (bench-391, bench-76).
-5 of 8 cases could not discriminate any patch in this setup. This is a pilot of 3 usable cases, not an
+5 of 8 cases gave the same score to all three inputs in this setup, so they say nothing about the oracle. This is a pilot of 3 usable cases, not an
 estimate of a rate over 94.
 
 Full per-run table: [results.md](results.md) and [results.csv](results.csv).
