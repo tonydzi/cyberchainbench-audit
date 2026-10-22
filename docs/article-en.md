@@ -8,9 +8,9 @@ I have spent 20 years around exchange infrastructure and smart-contract audits, 
 
 Here is what a patch has to survive when it is real. It ships through the proxy's upgrade path, signed by whoever holds upgrade rights. It keeps the storage layout, immutables and initializers compatible. It closes the class of bug, not one transaction. And it keeps callers working, which does not mean byte-identical logs: an accounting fix is supposed to change amounts. Keep that list in mind; I come back to it.
 
-There were three passes. The first confirmed their arithmetic. The second, a hostile model reviewer, knocked down my strongest claim. The third was a deeper review of my own write-up. It found errors in my work, and it found properties of the patch oracle the paper does not discuss.
+There were four passes. The first confirmed their arithmetic. The second, a hostile model reviewer, knocked down my strongest claim. The third was a deeper review of my own write-up: it found errors in my work and properties of the patch oracle the paper does not discuss. The fourth finally put the oracle on a scale.
 
-One caveat up front. Nothing here was measured on a fork, and no model was run. Everything below comes from reading code, counting case files and recomputing the paper's own tables.
+One caveat up front. No model was run at any point. The first three passes are reading code, counting case files and recomputing the paper's own tables; the fourth ran their own patch oracle on forks of historical Ethereum state, with inputs prepared in advance.
 
 ## Pass one: the arithmetic reproduces
 
@@ -54,7 +54,7 @@ What the statistics support: patch 23.4% is 22/94, Wilson 95% interval [16.0, 32
 
 ## What the patch oracle actually checks
 
-This section comes from reading the code at 1cb7410. None of it has been measured.
+This section comes from reading the code at 1cb7410. Pass four below then measured part of it.
 
 **Preservation is byte equality.** For each replayed normal transaction, `validate_patch.py:1330-1332` asserts an equal success flag, equal return data and an equal hash of the full log stream. The paper says those transactions are successful calls to the same entry point. So a correct fix that changes an amount or an event there scores 0. Take bench-05, SushiSwap Miso: the case file offers two reference fixes, remove `batch` or switch to WETH transfers, and, by the paper's own description, its five normal transactions are successful calls to that same entry point. If they are, the first reference fix fails by construction, since every replayed call now reverts, and the second changes the transfers those calls emit, so it very likely fails too. Accounting errors and price manipulation are 41 of the 94 cases; how many of their reference fixes fail is unmeasured.
 
@@ -74,15 +74,35 @@ This section comes from reading the code at 1cb7410. None of it has been measure
 
 These pull both ways. Byte equality can fail correct fixes. Out-of-gas rows can pass broken ones, any-change blocking passes patches that do not stop the attack through its first gate, and a visible test makes overfitting possible. Neither the paper nor the release reports a calibration against reference fixes or no-op patches, so the error bar on 23.4% as a measure of patching skill is not wide. It is unknown.
 
+## Pass four: the oracle on a scale
+
+A child session ran the upstream `validate_patch` command at 1cb7410, unmodified, on forks of historical Ethereum state through a free public archive endpoint. No model was involved. For eight cases it fed three inputs prepared in advance: the verified source unchanged, the vulnerable function with `revert();` as its first statement, and the vulnerable function with one extra event emitted and nothing else touched.
+
+Five of the eight cases gave the same score to all three inputs on this setup, so they say nothing about the oracle. In two the historical attack did not replay even before patching (bench-322, bench-410). In one the harness etched the wrong contract over the target (bench-247). In one the attack still reproduced after `revert()` in the labelled function, cause not isolated (bench-05). One was ineligible, because its only legitimate transaction creates a contract (bench-449). That leaves three usable cases, one of them (bench-559) only after we removed a `proxy_address: null` field that crashes the replay, see below. It is a pilot, not a rate over 94.
+
+On those three:
+
+- **bench-391 (BBT), emit-only: score 1.0.** The attacker's profit before and after the "patch" is the same number, to the last digit. The oracle still calls the attack blocked, because the extra event changes the log hash.
+- **bench-76 (HYPR), unchanged source: score 1.0.** Nothing was fixed. The recompiled runtime is 8,490 bytes against 11,380 on chain, and once it is written over the target the attack's profit drops from 2.57×10²⁴ to zero. Full marks for doing nothing.
+- **bench-559 (ChiSale), emit-only: score 0.** Here the extra event also fires on the legitimate transaction, and byte equality of the logs rejects it. A change that touches no logic and only adds an event, failed.
+
+So the unchanged source and the emit-only patch, neither of which fixes anything, each scored 1.0 once in three usable cases. The bare `revert()` scored 1.0 in bench-391 as well; it does stop that attack, but by switching the function off, and it only passes because the single legitimate transaction never calls it. And bench-559 is the mirror image: the strictness that should catch a bad patch also catches one that only adds an event.
+
+Why bench-76 passes is not isolated. One candidate I checked myself: the function that recompiles the source hard-codes `optimizer: enabled, runs: 200` and passes no EVM version (`src/infra/solidity/legacy.py:226`), while Sourcify shows bench-76 was compiled with 999,999 runs for `london`. That function is not only on the command-line path we ran; the scoring path calls it too (`src/eval/tasks/patch/evaluator.py:741`). Zeroed immutables are the other candidate. This is the family of problem shane-moore reported in issue #8 on bench-567; we now have a second contract where it shows up, measured.
+
+Two harness bugs showed up as measurements rather than readings. A transient error on the free RPC turned a 1.0 into a 0.0 in one run, because the failed replay was read as "the exploit still works"; the retry gave 1.0, and both logs are kept. And a case whose `proxy_address` is JSON `null` crashes the attack replay, because `attack_replay.py:259` turns null into the string "None". Four of the 55 Ethereum patch cases have a null proxy.
+
+A second run of bench-391 from a fresh clone gave the same three verdicts. The scores and profits above are in the raw forge logs under `calibration/runs/`, parsed by a script whose test breaks real logs and checks that the answer changes; byte sizes come from `calibration/bytecode_diff.jsonl` and compiler settings from Sourcify. I re-read the key logs, code lines and the Sourcify record myself before writing this.
+
 ## What the numbers can and cannot say
 
 They can say: the release reproduces the paper's patch arithmetic and subset construction, and on the paper's own scores patching is the lowest task in 9 of 10 configurations.
 
-They cannot say how much harder patching is, whether exploitation is harder than detection, or how much of 23.4% is model skill rather than oracle behaviour. That last one needs a measurement, not a reading.
+They cannot say how much harder patching is, whether exploitation is harder than detection, or how much of 23.4% is model skill rather than oracle behaviour. Pass four shows that last question is not academic: on this oracle a 1.0 does not reliably mean the exploit was fixed.
 
-## Not done, and the cheapest next step
+## Still not done
 
-I ran no model and no fork. The next step costs no model spend at all: run the patch oracle on the 94 cases with fixed inputs. A bare `revert()`, the unchanged verified source and an emit-only patch on all 94 give a first estimate of how often the oracle passes patches that fix nothing; a hand-written reference fix on a stratified 12 cases is a pilot for how often it fails correct ones. It needs the upstream harness (Docker, Foundry), an archive RPC at each case's fork block, block-explorer API access, and machine time. Only after that is a paid model run worth doing. The paper's Table 5 puts patching at $0.06 to $21.86 per case, about $217 for the headline configuration on 94 cases.
+No model was run, and no hand-written reference fix was tried, so false rejections of correct patches are shown, not counted. Ethereum only: I found no free archive endpoint for BSC. The verified sources came from Sourcify, because no Etherscan key turned up on any of our machines. The remaining 52 Ethereum cases and a reference-fix arm are the next step, still with zero model spend. A paid model run only makes sense after that; the paper's Table 5 puts patching at $0.06 to $21.86 per case, about $217 for the headline configuration on 94 cases.
 
 Boundaries: defensive measurement on historical, publicly disclosed incidents from the DeFiHackLabs corpus only. No mainnet, no wallets, no hunting for new vulnerabilities.
 
