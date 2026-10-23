@@ -1,0 +1,91 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+
+\title{A Comment on CyberChainBench (arXiv:2606.26216):\\
+The Headline Difficulty Gradient Is Not an Identified Comparison}
+\author{Anton Dziatkovskii\\
+\small Palo Alto AI Research Lab\\
+\small ORCID 0000-0001-7408-3054 \quad \url{https://github.com/tonydzi}}
+\date{October 2026}
+
+\begin{document}
+\sloppy\emergencystretch=3em
+\maketitle
+
+\begin{abstract}
+CyberChainBench reports that LLM agents score 37.5\% on vulnerability detection, 43.7\% on exploitation and 23.4\% on patching of real DeFi incidents, and presents this as ``a clear difficulty gradient''. We audit the paper (v1) against its public release (commit \code{1cb7410}) without running any model. The release reproduces the 94-case patch subset, and every patch cell of the per-difficulty table is arithmetically consistent with it as a whole number of passes. It does not identify the 200 cases behind 43.7\%. The three headline numbers are three differently defined scores on three non-identical case sets. The text and the release disagree with each other in several places: three different best patch scores, two tables that disagree for one configuration, a statement of monotonic degradation that fails in 11 of 30 table rows including the headline configuration, and a blocking condition written as ``the attack must revert'' while the released scorer also counts a changed return value or log stream as blocked. The leaderboard shipped with the release disagrees with the paper for 6 of 10 configurations. We do not claim the reported numbers are wrong. We claim the released materials do not support reading them as a ranking of task difficulty or as a measure of patch correctness, and we list controls that would help. All checks run from a public script with no API keys and no model calls.
+\end{abstract}
+
+\section{Scope}
+The object of this comment is arXiv:2606.26216v1~\cite{ccb} and the release \code{defai-labs/CyberChainBench} at commit \code{1cb7410} (tag \code{v1.0}), the only commit of that repository at the time of writing. Every number in Sections~2--5 is quoted from the paper, read from the 541 released case files or the released code, or computed from those by the public script; the boxed illustration in Section~5 comes from separately published raw logs. Tables of the paper were extracted structurally from the arXiv HTML into CSV; the audit script, the extracted tables and a red-first test that corrupts the inputs and checks that each verdict flips are public~\cite{audit}. No language model, chain or fork was used for Sections~2--5.
+
+\section{What reproduces}
+The release ships 541 case files. The code's patch filter (\code{fixable}, verified source, at least one historical legitimate transaction) yields exactly 94 cases, the paper's patch subset: 31 easy, 43 medium, 18 hard and 2 labelled \code{unknown}. With the two unlabelled cases treated as their own group, every patch cell of the paper's Table~4 is arithmetically consistent with a whole number of passes for all ten configurations; the headline 23.4\% corresponds to 22 of 94. This checks denominators, not the underlying model outcomes, which the release does not include. The temporal split (86 incidents dated 2025 or later, 455 earlier) reproduces. The subset counts and the patch arithmetic are consistent with the paper.
+
+\section{The headline is three estimands on three sets}
+Detection is an exact match of vulnerability type and function over 541 cases. Exploitation is the mean of $\min(\text{profit}/\text{reference},1)$, a clamped continuous score with iterative attempts, over 200 cases. Patching is the mean of $\mathbf{1}[\text{blocked}]\cdot\mathbf{1}[\text{normal transactions pass}]$, a binary conjunction with iterative attempts, over 94 cases whose overlap with the exploit set is not published. The paper defines each reward carefully; it does not discuss whether the three percentages can be compared, and the abstract reads them as one difficulty scale. Raw percentages of differently defined scores on different case sets do not by themselves identify relative task difficulty.
+
+The 200 exploit cases are not identifiable from the release. When present, the evaluation script reads a generated directory \code{data/benchmark/harbor\_tasks/exploit\_subset200} (\code{src/scripts/2\_eval/eval.py:475--477}); that path is excluded by \code{.gitignore} and not shipped. We found no released code that builds it and no sampling rule in the paper. The exploit headline therefore cannot be independently reproduced from the released materials.
+
+The headline numbers are reported without uncertainty. As a descriptive binomial interval, ignoring oracle error and the selection of the best configuration, 22/94 spans [16.0, 32.9]. As an illustrative sensitivity calculation only, treating the sets as independent and giving the exploit score its maximal variance, exploitation exceeds detection by 6.2 points ($z=1.52$) and patching falls below exploitation ($z\approx3.6$); dependence between overlapping sets is not modelled, so these are not tests of a difficulty ordering. Descriptively, exploitation exceeds detection in 7 of 10 configurations and patching is the lowest of the three scores in 9 of 10, Codex\,$\times$\,GPT-5.2 being the exception. The ordering of scores is clear for patching; the data do not establish a three-step ordering of task difficulty.
+
+\section{Internal inconsistencies}
+\paragraph{Three best patch scores.} Section~4 states ``Opus 4.7 leads on patch pass rate (21.3\%)''. The abstract and the same section state ``the best patch pass rate (23.4\%)''. Table~4 prints 24.5\% for Codex\,$\times$\,GPT-5.2, and that cell is consistent with its own easy/medium/hard cells. The same Section~4 sentence names Opus 4.7 the realized-profit leader at \$45.5M, while the abstract and Table~5 give \$57.4M to GPT-5.5.
+
+\paragraph{Table~4 against Table~5.} Table~4 ``Patch All'' and Table~5 ``Pass\,\%'' report the same quantity and agree for nine configurations. For GPT-5.2 they read 24.5 and 17.5. Three Table~5 cells are not $k/94$ for any integer $k$ (GPT-5.2 block 56.1 and pass 17.5, DeepSeek~V4 block 54.0); the GPT-5.2 pair is consistent with $k/57$. We report this as an inconsistency and do not assume a typo.
+
+\paragraph{Monotonic degradation.} Section~4.2 states ``All models show monotonic degradation from easy to hard cases''. In Table~4, 11 of 30 task rows are not monotonic, including the headline configuration on both reported tasks: GPT-5.5 exploit 39.8\,/\,50.5\,/\,33.2 and patch 19.4\,/\,32.6\,/\,11.1 (easy\,/\,medium\,/\,hard).
+
+\paragraph{The patch reward, as written and as implemented.} The paper states the blocking condition four times as ``the original attack must revert'' (Section~3, the oracle paragraph, the reward definition and the agent prompt); the oracle paragraph adds the alternative ``or produce $<1\%$ of original profit''. The tool description and the reward definition say the patch is deployed ``via proxy upgrade'', while the oracle paragraph says it is injected with \code{vm.etch}. In the released scorer the attack replay counts as blocked if the call fails \emph{or} its return data changes \emph{or} its log hash changes (\code{src/eval/tasks/patch/attack\_replay.py:227}); the profit test runs only when none of those changed (line 229). The patch is etched at the case's proxy address for the attack replay when one is set (line 260) and at the case's \code{vulnerable\_address} for the legitimate transactions (\code{src/infra/cli/validate\_patch.py:1577}).
+
+\paragraph{Release artefacts.} The leaderboard shipped in the same repository differs from Table~4 by more than rounding for 6 of 10 configurations on at least one task (file \code{site/assets/leaderboard.json}); its builder notes that the Codex rows come from an earlier leaderboard. The paper's filter arithmetic for the patch subset, $153-31-29$, gives 93, not 94; the release removes 39 and then 20. The site counts the 12 \code{unknown}-difficulty cases as easy, which is the only way the paper's ``42\% easy'' reproduces. Nine cases carry curator flags marking them disputed or to be skipped (two of them, key compromises, are in the patch subset); no code under \code{src/} or \code{site/} reads those flags.
+
+\paragraph{The temporal split as a conditional.} The paper gives Opus 4.7 exploit 44.9\% before the knowledge cutoff and 38.8\% after, and Table~4 gives 42.3\% over the exploit set. If these are one weighted mean over the 200 exploit cases, the set must contain about 85 post-cutoff incidents; the corpus contains 86 and a proportional sample would contain about 32. The figures need an explanation: a strong skew of the exploit set toward recent incidents, which would bear on the contamination argument, numbers computed on different populations, or a reporting error. The paper reports no post-cutoff number for patching; only 9 of the 94 patch cases are post-cutoff.
+
+\section{What the released scorer tests}
+Read from the code at \code{1cb7410}. ``Normal operation preserved'' is byte equality of the success flag, the return data hash and the hash of the full log stream on one to five historical calls (\code{validate\_patch.py:1330--1332}); a correct fix that changes an amount or an event on that entry point fails it. A legitimate-call replay whose forge output contains the string \code{MemoryOOG} or \code{OutOfGas} is marked preserved (lines 1608--1612), and the reported number of checked calls is the number of result rows (line 1638), not the number of replays that printed the check marker. On the verified-source path, recompilation hard-codes \code{optimizer: enabled, runs: 200} and passes no EVM version (\code{src/infra/solidity/legacy.py:226}); this function is called by the scoring path (\code{src/eval/tasks/patch/evaluator.py:741}). In the path we traced, the explorer's verified compiler version is fetched (\code{src/infra/chain/metadata.py:838}) but only optimizer and EVM settings are copied from it (\code{validate\_patch.py:1373--1382}). These properties push in both directions. Byte equality can reject correct fixes. Separately, any-change blocking can let a patch through the blocking check without stopping the attack, and the out-of-gas rule can let a patch through the preservation check without the replay being verified; full credit requires passing both. We found no calibration of the oracle against no-op patches or reference fixes in the paper or the release.
+
+\begin{center}
+\fbox{\begin{minipage}{0.92\linewidth}
+\small\textbf{Illustration, not a rate.} We ran the released \code{validate\_patch} command-line tool at \code{1cb7410}, without code changes, on forks of historical Ethereum state for eight cases with three fixed inputs each and no model. Five cases gave the same score to all three inputs and are uninformative on this setup. On bench-391, a patch that only emits an additional event in the labelled function scored 1.0 while the tool reported identical attacker profit before and after the patch; the attack counted as blocked because the log hash changed. This is the any-change rule of Section~4 observed on a real case. It was obtained through the command-line path; equivalence with the scoring path used for the paper's tables was not tested. Results for recompiled unchanged sources are not interpreted here, because recompilation is not a null intervention: the on-chain-bytecode control has not been run. Raw logs are in the repository~\cite{audit}.
+\end{minipage}}
+\end{center}
+
+\section{What this does and does not show}
+It does not show that 23.4\% or 43.7\% are wrong, nor the direction or size of any bias. It shows that the released materials do not identify the exploit set, that the three headline numbers are not one scale, that the paper's text, tables and shipped leaderboard disagree in the places listed, and that the implemented blocking rule is broader than the one described. These limits are of the same family as the plausible-but-incorrect patches long documented in automated program repair~\cite{qi2015,smith2015} and recently measured for agent benchmarks in other domains~\cite{patchbench,robobugbench}; what is specific here is the on-chain replay oracle.
+
+Controls that would help interpret the patch number as patch correctness under this oracle: for each case, a hosting control that etches the on-chain runtime and checks that the historical attack still pays; on hosted cases only, adversarial negative controls (\code{revert()}, emit-only) with their expected component outcomes stated in advance, and positive controls with independently checked reference fixes; and a rescoring of the same traces with a predicate that requires attacker profit to fall and does not count out-of-gas as preservation. Any statement about relative task difficulty would additionally need the exploit case list, same-case comparisons and matched attempt budgets.
+
+\section*{Prior work and corrections}
+Before this comment, a contributor opened an issue and seven pull requests on the release addressing replay accounting, null proxy addresses, prompt and scorer alignment and build settings~\cite{moore}; we credit that work and verified in code only the points cited above. An earlier public version of our audit overstated several claims (that the headline numbers were confirmed, that forks had been run, the composition effect, and the extent of external review); the corrections are listed in the repository changelog~\cite{audit}.
+
+\section*{Use of AI tools}
+The audit scripts, the reading of the release and drafts of this text were produced with AI assistance (Anthropic Claude); adversarial reviews of intermediate conclusions were run with OpenAI Codex, xAI Grok, Google Gemini and Z.ai GLM. One of those reviews refuted a stronger claim in an earlier version, and the refutation is published with the prompts. The author takes responsibility for every claim. Sections~2--5 are reproduced by \code{make} in the repository; the boxed illustration is reproduced from \code{calibration/} with an archive RPC endpoint.
+
+\section*{Reproduction}
+\begin{verbatim}
+git clone https://github.com/tonydzi/cyberchainbench-audit
+cd cyberchainbench-audit
+make        # clones the release at 1cb7410, runs 16 checks
+make red    # corrupts the inputs and shows each verdict flip
+\end{verbatim}
+
+\begin{thebibliography}{9}
+\bibitem{ccb} J.~Huang, F.~Jiang, R.~Poovendran, Z.~Lin. \emph{CyberChainBench: Can AI Agents Secure Smart Contracts Against Real-World On-Chain Vulnerabilities?} arXiv:2606.26216v1, 2026. Release: \url{https://github.com/defai-labs/CyberChainBench}, commit 1cb7410.
+\bibitem{audit} A.~Dziatkovskii. \emph{cyberchainbench-audit}. \url{https://github.com/tonydzi/cyberchainbench-audit}, 2026.
+\bibitem{qi2015} Z.~Qi, F.~Long, S.~Achour, M.~Rinard. An analysis of patch plausibility and correctness for generate-and-validate patch generation systems. In \emph{ISSTA}, 2015.
+\bibitem{smith2015} E.~K.~Smith, E.~T.~Barr, C.~Le~Goues, Y.~Brun. Is the cure worse than the disease? Overfitting in automated program repair. In \emph{ESEC/FSE}, 2015.
+\bibitem{patchbench} C.~Shen, J.~Li, A.~Mahajan, J.~S.~Tian, Y.~Kwon, Y.~Chen. \emph{PatchBench: Evaluating AI Agents for Vulnerability Patching}. arXiv:2609.04075, 2026.
+\bibitem{robobugbench} A.~Tuzikov. \emph{RoboBugBench: Benchmarking Automated Repair of Real Robot Software Under an Audited Behavioral Oracle}. arXiv:2610.16369, 2026.
+\bibitem{moore} shane-moore. Issue \#8 and pull requests \#1--\#7 on \code{defai-labs/CyberChainBench}, October 2026.
+\end{thebibliography}
+\end{document}

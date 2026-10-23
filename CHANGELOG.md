@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.2, 2026-10-23
+
+- `paper/`: a 5-page technical comment on arXiv:2606.26216, scoped to the claims `make` reproduces, built and checked with pdfLaTeX; arXiv upload package and metadata in `paper/ARXIV.md`.
+- New check (16 in total): the paper's sentence "All models show monotonic degradation from easy to hard cases" fails in 11 of 30 rows of its own Table 4, including GPT-5.5 exploit (39.8 / 50.5 / 33.2) and patch (19.4 / 32.6 / 11.1). Red-first test extended in the reverse direction: making every row monotonic flips the check to PASS.
+- Fixed: README linked `calibration/RESULTS.md`; the file is `results.md` (GitHub paths are case-sensitive).
+
 ## v2.1.1, 2026-10-22
 
 - Article (EN and RU) now carries the calibration as "Pass four" and no longer says that nothing was measured; "What the numbers can and cannot say" moved after it.
