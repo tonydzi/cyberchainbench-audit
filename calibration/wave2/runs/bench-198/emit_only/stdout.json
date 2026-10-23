@@ -1,0 +1,109 @@
+{
+  "case_id": "bench-198",
+  "case_name": "Sturdy Finance",
+  "patched_path": "$CCB/arms/bench-198/emit_only.sol",
+  "score": 0.0,
+  "best_score": 0.0,
+  "iteration": 3,
+  "summary": "patched code compiled, but the exploit still passed",
+  "diagnostic_notes": [
+    "used historical attack-tx replay lane because no verification exploit harness was available",
+    "attack-tx replay validation error: failed to compile fixed bytecode: TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\n   --> contracts_protocol_libraries_logic_GenericLogic.sol:165:10:\n    |\n165 |   { emit CCBCalibNoop();\n    |          ^^^^^^^^^^^^^^\n\n\n> command: `$HOME/.solcx/solc-v0.8.10 --standard-json`\n> return code: `0`\n> stdout:\n{\"errors\":[{\"component\":\"general\",\"errorCode\":\"8961\",\"formattedMessage\":\"TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\\n   --> contracts_protocol_libraries_logic_GenericLogic.sol:165:10:\\n    |\\n165 |   { emit CCBCalibNoop();\\n    |          ^^^^^^^^^^^^^^\\n\\n\",\"message\":\"Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\",\"severity\":\"error\",\"sourceLocation\":{\"end\":5849,\"file\":\"contracts_protocol_libraries_logic_GenericLogic.sol\",\"start\":5835},\"type\":\"TypeError\"}],\"sources\":{}}\n\n> stderr:",
+    "exploit still passes; skipping normal-tx replay"
+  ],
+  "compiles": true,
+  "exploit_blocked": false,
+  "normal_ops_pass": false,
+  "plan_only": false,
+  "classification_present": true,
+  "patch_possible": true,
+  "required_authority": "",
+  "fix_confidence": "",
+  "fix_rationale": "",
+  "target_contracts": [],
+  "expected_target_contracts": [
+    "LendingPool"
+  ],
+  "proxy_target_matched": true,
+  "proxy_detected": false,
+  "proxy_kind": "",
+  "proxy_implementation": "",
+  "proxy_admin": "",
+  "compile_error": "",
+  "test_output": "failed to compile fixed bytecode: TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\n   --> contracts_protocol_libraries_logic_GenericLogic.sol:165:10:\n    |\n165 |   { emit CCBCalibNoop();\n    |          ^^^^^^^^^^^^^^\n\n\n> command: `$HOME/.solcx/solc-v0.8.10 --standard-json`\n> return code: `0`\n> stdout:\n{\"errors\":[{\"component\":\"general\",\"errorCode\":\"8961\",\"formattedMessage\":\"TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\\n   --> contracts_protocol_libraries_logic_GenericLogic.sol:165:10:\\n    |\\n165 |   { emit CCBCalibNoop();\\n    |          ^^^^^^^^^^^^^^\\n\\n\",\"message\":\"Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\",\"severity\":\"error\",\"sourceLocation\":{\"end\":5849,\"file\":\"contracts_protocol_libraries_logic_GenericLogic.sol\",\"start\":5835},\"type\":\"TypeError\"}],\"sources\":{}}\n\n> stderr:",
+  "regression_output": "",
+  "artifact_dir": "$CCB/runs/bench-198/emit_only",
+  "response_path": "$CCB/runs/bench-198/emit_only/raw_response.txt",
+  "score_path": "$CCB/runs/bench-198/emit_only/score.json",
+  "patched_code_path": "$CCB/runs/bench-198/emit_only/patched_code.sol",
+  "harness_path": "",
+  "regression_path": "",
+  "forge_output_path": "",
+  "regression_output_path": "",
+  "attack_tx_replay": {
+    "ok": false,
+    "case_id": "bench-198",
+    "case_name": "Sturdy Finance",
+    "chain": "ethereum",
+    "contract_address": "0x46bea99d977f269399fb3a4637077bb35f075516",
+    "fixed_path": "$CCB/arms/bench-198/emit_only.sol",
+    "selection_mode": "case_attack_txs",
+    "selected_transactions": [
+      {
+        "tx_hash": "0xeb87ebc0a18aca7d2a9ffcabf61aa69c9e8d3c6efade9e2303f8857717fb9eb7",
+        "from": "0x1e8419e724d51e87f78e222d935fbbdeb631a08b",
+        "to": "0x0b09c86260c12294e3b967f0d523b4b2bcdfbeab",
+        "input": "0xb8d9ff92000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000004726f636b00000000000000000000000000000000000000000000000000000000",
+        "value_wei": 0,
+        "block_number": 17460610,
+        "is_creation": false
+      }
+    ],
+    "results": [],
+    "error": "failed to compile fixed bytecode: TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\n   --> contracts_protocol_libraries_logic_GenericLogic.sol:165:10:\n    |\n165 |   { emit CCBCalibNoop();\n    |          ^^^^^^^^^^^^^^\n\n\n> command: `$HOME/.solcx/solc-v0.8.10 --standard-json`\n> return code: `0`\n> stdout:\n{\"errors\":[{\"component\":\"general\",\"errorCode\":\"8961\",\"formattedMessage\":\"TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\\n   --> contracts_protocol_libraries_logic_GenericLogic.sol:165:10:\\n    |\\n165 |   { emit CCBCalibNoop();\\n    |          ^^^^^^^^^^^^^^\\n\\n\",\"message\":\"Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\",\"severity\":\"error\",\"sourceLocation\":{\"end\":5849,\"file\":\"contracts_protocol_libraries_logic_GenericLogic.sol\",\"start\":5835},\"type\":\"TypeError\"}],\"sources\":{}}\n\n> stderr:",
+    "report_path": "$CCB/runs/bench-198/emit_only/attack_tx_replay_cli/attack_tx_replay.json"
+  },
+  "historical_attack_txs_checked": 0,
+  "historical_attack_txs_blocked": 0,
+  "historical_attack_txs_all_blocked": false,
+  "normal_tx_replay": {
+    "ok": false,
+    "case_id": "bench-198",
+    "case_name": "Sturdy Finance",
+    "chain": "ethereum",
+    "contract_address": "0x46bea99d977f269399fb3a4637077bb35f075516",
+    "fixed_path": "$CCB/arms/bench-198/emit_only.sol",
+    "selection_mode": "static",
+    "selected_transactions": [
+      {
+        "tx_hash": "0xf64fea6c3fc82d937b08114a114183c505e09af093a9ff01cd9e78a5aabb71d1",
+        "from": "0x59bae654c73f39f601ff2db5041bfe4e5aef73c7",
+        "to": "0xe27f1a136c0114aded15b24b576ad7f71483dcca",
+        "input": "0x474cf53d0000000000000000000000009f72dc67cec672bb99e3d02cbea0a21536a2b65700000000000000000000000059bae654c73f39f601ff2db5041bfe4e5aef73c70000000000000000000000000000000000000000000000000000000000000000",
+        "value_wei": 59000000000000000000,
+        "block_number": 17459552
+      },
+      {
+        "tx_hash": "0x92e3d2d40a0ac88863f00ac9b7c29eeb016b1a8cc2182b2281c4736a425413aa",
+        "from": "0x11b1785d9ac81480c03210e89f1508c8c115888e",
+        "to": "0x638b129ab6d241ec2f890aa3af197bf84b5ff1bb",
+        "input": "0x2d5a1c2600000000000000000000000000000000000000000000000005340e230343015200000000000000000000000000000000000000000000000000000000000111700000000000000000000000000000000000000000000000000000000000000014000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000000000000000000000000000000000000000000000",
+        "value_wei": 0,
+        "block_number": 17456128
+      },
+      {
+        "tx_hash": "0xde37abec4fe61f2d005e28f242eea80b3c8b05b0d6c4ecb009f9b1df5b145e0d",
+        "from": "0x8ec16177441cac939ffdb5bcb18a9c53ead3ad13",
+        "to": "0x9f72dc67cec672bb99e3d02cbea0a21536a2b657",
+        "input": "0xe8eda9df000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000000000000000000000000000002c68af0bb14000000000000000000000000000008ec16177441cac939ffdb5bcb18a9c53ead3ad130000000000000000000000000000000000000000000000000000000000000000",
+        "value_wei": 0,
+        "block_number": 17453496
+      }
+    ],
+    "results": [],
+    "error": "failed to compile fixed bytecode: TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\n   --> contracts_protocol_libraries_logic_GenericLogic.sol:165:10:\n    |\n165 |   { emit CCBCalibNoop();\n    |          ^^^^^^^^^^^^^^\n\n\n> command: `$HOME/.solcx/solc-v0.8.10 --standard-json`\n> return code: `0`\n> stdout:\n{\"errors\":[{\"component\":\"general\",\"errorCode\":\"8961\",\"formattedMessage\":\"TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\\n   --> contracts_protocol_libraries_logic_GenericLogic.sol:165:10:\\n    |\\n165 |   { emit CCBCalibNoop();\\n    |          ^^^^^^^^^^^^^^\\n\\n\",\"message\":\"Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\",\"severity\":\"error\",\"sourceLocation\":{\"end\":5849,\"file\":\"contracts_protocol_libraries_logic_GenericLogic.sol\",\"start\":5835},\"type\":\"TypeError\"}],\"sources\":{}}\n\n> stderr:"
+  },
+  "historical_normal_txs_checked": 0,
+  "historical_normal_txs_preserved": 0,
+  "historical_normal_txs_all_preserved": false
+}

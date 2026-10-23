@@ -101,6 +101,7 @@ def parse_run(arm_dir: Path) -> dict:
         "forge_sha256_16": sha(atk_files + nrm_files),
         "score_lane_blocked": (all(a["blocked"] for a in score_lane) if score_lane else None),
         "rpc_error_in_logs": rpc_err,
+        "attack_reproduces": all(a["before_ok"] for a in atk),
     }
     row["lanes_disagree"] = (
         row["score_lane_blocked"] is not None and bool(row["score_lane_blocked"]) != row["exploit_blocked"]

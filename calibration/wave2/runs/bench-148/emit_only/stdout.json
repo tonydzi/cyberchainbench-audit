@@ -1,0 +1,109 @@
+{
+  "case_id": "bench-148",
+  "case_name": "BTC20",
+  "patched_path": "$CCB/arms/bench-148/emit_only.sol",
+  "score": 0.0,
+  "best_score": 0.0,
+  "iteration": 3,
+  "summary": "patched code compiled, but the exploit still passed",
+  "diagnostic_notes": [
+    "used historical attack-tx replay lane because no verification exploit harness was available",
+    "attack-tx replay validation error: failed to compile fixed bytecode: TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\n   --> contracts_ETH_PresaleV4.sol:358:79:\n    |\n358 |   function fetchPrice(uint256 amountOut) public view returns (uint256) { emit CCBCalibNoop();\n    |                                                                               ^^^^^^^^^^^^^^\n\n\n> command: `$HOME/.solcx/solc-v0.8.9 --standard-json`\n> return code: `0`\n> stdout:\n{\"errors\":[{\"component\":\"general\",\"errorCode\":\"8961\",\"formattedMessage\":\"TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\\n   --> contracts_ETH_PresaleV4.sol:358:79:\\n    |\\n358 |   function fetchPrice(uint256 amountOut) public view returns (uint256) { emit CCBCalibNoop();\\n    |                                                                               ^^^^^^^^^^^^^^\\n\\n\",\"message\":\"Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\",\"severity\":\"error\",\"sourceLocation\":{\"end\":15056,\"file\":\"contracts_ETH_PresaleV4.sol\",\"start\":15042},\"type\":\"TypeError\"}],\"sources\":{}}\n\n> stderr:",
+    "exploit still passes; skipping normal-tx replay"
+  ],
+  "compiles": true,
+  "exploit_blocked": false,
+  "normal_ops_pass": false,
+  "plan_only": false,
+  "classification_present": true,
+  "patch_possible": true,
+  "required_authority": "",
+  "fix_confidence": "",
+  "fix_rationale": "",
+  "target_contracts": [],
+  "expected_target_contracts": [
+    "PresaleV4"
+  ],
+  "proxy_target_matched": true,
+  "proxy_detected": false,
+  "proxy_kind": "",
+  "proxy_implementation": "",
+  "proxy_admin": "",
+  "compile_error": "",
+  "test_output": "failed to compile fixed bytecode: TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\n   --> contracts_ETH_PresaleV4.sol:358:79:\n    |\n358 |   function fetchPrice(uint256 amountOut) public view returns (uint256) { emit CCBCalibNoop();\n    |                                                                               ^^^^^^^^^^^^^^\n\n\n> command: `$HOME/.solcx/solc-v0.8.9 --standard-json`\n> return code: `0`\n> stdout:\n{\"errors\":[{\"component\":\"general\",\"errorCode\":\"8961\",\"formattedMessage\":\"TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\\n   --> contracts_ETH_PresaleV4.sol:358:79:\\n    |\\n358 |   function fetchPrice(uint256 amountOut) public view returns (uint256) { emit CCBCalibNoop();\\n    |                                                                               ^^^^^^^^^^^^^^\\n\\n\",\"message\":\"Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\",\"severity\":\"error\",\"sourceLocation\":{\"end\":15056,\"file\":\"contracts_ETH_PresaleV4.sol\",\"start\":15042},\"type\":\"TypeError\"}],\"sources\":{}}\n\n> stderr:",
+  "regression_output": "",
+  "artifact_dir": "$CCB/runs/bench-148/emit_only",
+  "response_path": "$CCB/runs/bench-148/emit_only/raw_response.txt",
+  "score_path": "$CCB/runs/bench-148/emit_only/score.json",
+  "patched_code_path": "$CCB/runs/bench-148/emit_only/patched_code.sol",
+  "harness_path": "",
+  "regression_path": "",
+  "forge_output_path": "",
+  "regression_output_path": "",
+  "attack_tx_replay": {
+    "ok": false,
+    "case_id": "bench-148",
+    "case_name": "BTC20",
+    "chain": "ethereum",
+    "contract_address": "0xdb0618e0b850cab3f756d030398be22929226d5c",
+    "fixed_path": "$CCB/arms/bench-148/emit_only.sol",
+    "selection_mode": "case_attack_txs",
+    "selected_transactions": [
+      {
+        "tx_hash": "0xcdd93e37ba2991ce02d8ca07bf6563bf5cd5ae801cbbce3dd0babb22e30b2dbe",
+        "from": "0x6ce9fa08f139f5e48bc607845e57efe9aa34c9f6",
+        "to": "0xb7fbf984a50cd7c66e6da3448d68d9f3b7f24f33",
+        "input": "0x2b774292000000000000000000000000e86df1970055e9caee93dae9b7d5fd71595d0e18000000000000000000000000d50c5b8f04587d67298915e099e170af3cd6909a000000000000000000000000db81b8cfb2718f7289ae2365de800ac2c787e3850000000000000000000000007234c91bd835a6ed108c8e986e0663b14f9de14e0000000000000000000000001f006f43f57c45ceb3659e543352b4fae4662df70000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000001800000000000000000000000000000000000000000000000000000000000000001000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000001043561a882930000000000000000000000000000000000000000000000000000000000000000000021234000000000000000000000000000000000000000000000000000000000000",
+        "value_wei": 0,
+        "block_number": 17949215,
+        "is_creation": false
+      }
+    ],
+    "results": [],
+    "error": "failed to compile fixed bytecode: TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\n   --> contracts_ETH_PresaleV4.sol:358:79:\n    |\n358 |   function fetchPrice(uint256 amountOut) public view returns (uint256) { emit CCBCalibNoop();\n    |                                                                               ^^^^^^^^^^^^^^\n\n\n> command: `$HOME/.solcx/solc-v0.8.9 --standard-json`\n> return code: `0`\n> stdout:\n{\"errors\":[{\"component\":\"general\",\"errorCode\":\"8961\",\"formattedMessage\":\"TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\\n   --> contracts_ETH_PresaleV4.sol:358:79:\\n    |\\n358 |   function fetchPrice(uint256 amountOut) public view returns (uint256) { emit CCBCalibNoop();\\n    |                                                                               ^^^^^^^^^^^^^^\\n\\n\",\"message\":\"Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\",\"severity\":\"error\",\"sourceLocation\":{\"end\":15056,\"file\":\"contracts_ETH_PresaleV4.sol\",\"start\":15042},\"type\":\"TypeError\"}],\"sources\":{}}\n\n> stderr:",
+    "report_path": "$CCB/runs/bench-148/emit_only/attack_tx_replay_cli/attack_tx_replay.json"
+  },
+  "historical_attack_txs_checked": 0,
+  "historical_attack_txs_blocked": 0,
+  "historical_attack_txs_all_blocked": false,
+  "normal_tx_replay": {
+    "ok": false,
+    "case_id": "bench-148",
+    "case_name": "BTC20",
+    "chain": "ethereum",
+    "contract_address": "0xdb0618e0b850cab3f756d030398be22929226d5c",
+    "fixed_path": "$CCB/arms/bench-148/emit_only.sol",
+    "selection_mode": "static",
+    "selected_transactions": [
+      {
+        "tx_hash": "0x353de92074d723d57eec92937c06e9b6a3195d241943f2ad521bdcd51bff0590",
+        "from": "0x4ca556c82a7101df20e3e34f92e6fc08ee2950ee",
+        "to": "0x1f006f43f57c45ceb3659e543352b4fae4662df7",
+        "input": "0x7649b9570000000000000000000000000000000000000000000000000000000000000058",
+        "value_wei": 74510000000000000,
+        "block_number": 17949206
+      },
+      {
+        "tx_hash": "0x9e1fa75fea793066b85ad5cde3c5ff91f78c11a77036c5456c7336eb2adf4d18",
+        "from": "0xff6bc675994c7d73a718c7852564c0d40eb9c680",
+        "to": "0x1f006f43f57c45ceb3659e543352b4fae4662df7",
+        "input": "0xfe4cf22e000000000000000000000000000000000000000000000000000000000000004f",
+        "value_wei": 66750000000000000,
+        "block_number": 17949164
+      },
+      {
+        "tx_hash": "0x0510a29a237a4f4ab3d1a6de2c3516630fac20f7d399fd23777470aeb7a890ca",
+        "from": "0x4ca556c82a7101df20e3e34f92e6fc08ee2950ee",
+        "to": "0x1f006f43f57c45ceb3659e543352b4fae4662df7",
+        "input": "0x7649b957000000000000000000000000000000000000000000000000000000000000004b",
+        "value_wei": 62250392200000000,
+        "block_number": 17949139
+      }
+    ],
+    "results": [],
+    "error": "failed to compile fixed bytecode: TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\n   --> contracts_ETH_PresaleV4.sol:358:79:\n    |\n358 |   function fetchPrice(uint256 amountOut) public view returns (uint256) { emit CCBCalibNoop();\n    |                                                                               ^^^^^^^^^^^^^^\n\n\n> command: `$HOME/.solcx/solc-v0.8.9 --standard-json`\n> return code: `0`\n> stdout:\n{\"errors\":[{\"component\":\"general\",\"errorCode\":\"8961\",\"formattedMessage\":\"TypeError: Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\\n   --> contracts_ETH_PresaleV4.sol:358:79:\\n    |\\n358 |   function fetchPrice(uint256 amountOut) public view returns (uint256) { emit CCBCalibNoop();\\n    |                                                                               ^^^^^^^^^^^^^^\\n\\n\",\"message\":\"Function declared as view, but this expression (potentially) modifies the state and thus requires non-payable (the default) or payable.\",\"severity\":\"error\",\"sourceLocation\":{\"end\":15056,\"file\":\"contracts_ETH_PresaleV4.sol\",\"start\":15042},\"type\":\"TypeError\"}],\"sources\":{}}\n\n> stderr:"
+  },
+  "historical_normal_txs_checked": 0,
+  "historical_normal_txs_preserved": 0,
+  "historical_normal_txs_all_preserved": false
+}

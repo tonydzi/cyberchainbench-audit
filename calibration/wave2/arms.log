@@ -1,0 +1,103 @@
+== bench-02
+{"case": "bench-02", "function": "swapIn", "target": "contracts_Monoswap.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-103
+{"case": "bench-103", "function": "_mintScaled", "target": "@mahalend_core-v3_contracts_protocol_tokenization_base_ScaledBalanceTokenBase.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-112
+{"case": "bench-112", "function": "mintFresh", "target": "OErc20Delegate.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-117
+{"case": "bench-117", "function": "withdraw", "target": "AstridProtocol.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-121
+auto: no file with function cumulateToLiquidityIndex in upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x1c2220437b068a8c124ac1d158f7f786fbea701e
+== bench-136
+{"case": "bench-136", "function": "swapOnWithdrawal", "target": "contracts_OxODexPool.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-148
+{"case": "bench-148", "function": "fetchPrice", "target": "contracts_ETH_PresaleV4.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-151
+{"case": "bench-151", "function": "withdraw", "target": "contracts_core_Vault.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-157
+auto: no file with function remove_liquidity in upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x6326debbaa15bcfe603d831e7d75f4fc10d9b43e
+== bench-162
+    assert contract_open is not None, "no enclosing contract found"
+AssertionError: no enclosing contract found
+== bench-181
+{"case": "bench-181", "function": "redeemFresh", "target": "contracts_CToken_CToken.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-198
+    assert contract_open is not None, "no enclosing contract found"
+AssertionError: no enclosing contract found
+== bench-21
+{"case": "bench-21", "function": "_getTxType", "target": "_C_Crypto_Projects_xstable_contracts_XST2.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-220
+{"case": "bench-220", "function": "init", "target": "DVM.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-23
+{"case": "bench-23", "function": "borrowFresh", "target": "contracts_CToken.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-237
+    assert contract_open is not None, "no enclosing contract found"
+AssertionError: no enclosing contract found
+== bench-239
+{"case": "bench-239", "function": "donateToReserves", "target": "contracts_modules_EToken.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-252
+{"case": "bench-252", "function": "depositAsset", "target": "contracts_Exchange.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-257
+    assert contract_open is not None, "no enclosing contract found"
+AssertionError: no enclosing contract found
+== bench-266
+{"case": "bench-266", "function": "_deposit", "target": "Vault.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-27
+{"case": "bench-27", "function": "process", "target": "packages_contracts-core_contracts_Replica.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-31
+    assert contract_open is not None, "no enclosing contract found"
+AssertionError: no enclosing contract found
+== bench-336
+{"case": "bench-336", "function": "_calculateAvailableCollateralToLiquidate", "target": "contracts_protocol_lendingpool_LendingPoolCollateralManager.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-34
+{"case": "bench-34", "function": "orderAllowed", "target": "contracts_P2Controller.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-36
+{"case": "bench-36", "function": "_spendAllowance", "target": "_contracts_imports_SchnoodleV9Base.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-416
+{"case": "bench-416", "function": "repayForAll", "target": "src_cauldrons_CauldronV4.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-423
+{"case": "bench-423", "function": "performAction", "target": "src_swap_wrappedTokenSwapper_swapWrappedImpl.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-428
+{"case": "bench-428", "function": "withdraw", "target": "EthVaultImpl.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-433
+{"case": "bench-433", "function": "_additionalCookAction", "target": "src_cauldrons_CauldronV4.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-434
+{"case": "bench-434", "function": "_additionalCookAction", "target": "src_cauldrons_CauldronV4.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-44
+{"case": "bench-44", "function": "borrowFresh", "target": "CToken.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-465
+auto: no file with function 0x94bf804d in upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x3747484567119592ff6841df399cf679955a111a
+== bench-48
+{"case": "bench-48", "function": "emergencyCommit", "target": "contracts_farm_facets_GovernanceFacet_GovernanceFacet.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-483
+auto: no file with function uniswapV3SwapCallback in upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x80f18b12a6dbd515c5ad01a2006abf30c5972158
+== bench-515
+{"case": "bench-515", "function": "removeLiquidityWhenKIncreases", "target": "contracts_PumpToken.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-518
+{"case": "bench-518", "function": "liquidateBorrow", "target": "AlkemiEarnPublic.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-524
+    assert contract_open is not None, "no enclosing contract found"
+AssertionError: no enclosing contract found
+== bench-53
+{"case": "bench-53", "function": "verifySignatures", "target": "MainchainGatewayManager.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-534
+    assert contract_open is not None, "no enclosing contract found"
+AssertionError: no enclosing contract found
+== bench-562
+{"case": "bench-562", "function": "swapExactAmountIn", "target": "BPool.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-565
+{"case": "bench-565", "function": "price", "target": "src_morpho-chainlink_MorphoChainlinkOracleV2.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-567
+WARN 2 matches for _transfer; using first
+{"case": "bench-567", "function": "_transfer", "target": "SASHA.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-57
+{"case": "bench-57", "function": "swapAndStartBridgeTokensViaAnyswap", "target": "src_Facets_AnyswapFacet.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-72
+{"case": "bench-72", "function": "collectInterest", "target": "project:_contracts_staking_GoodFundManager.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-77
+    assert contract_open is not None, "no enclosing contract found"
+AssertionError: no enclosing contract found
+== bench-80
+{"case": "bench-80", "function": "multicall", "target": "node_modules_@openzeppelin_contracts-upgradeable_utils_MulticallUpgradeable.sol", "arms": ["unchanged", "revert", "emit_only"]}
+== bench-84
+{"case": "bench-84", "function": "receive", "target": "TokenMapped.sol", "arms": ["unchanged", "revert", "emit_only"]}

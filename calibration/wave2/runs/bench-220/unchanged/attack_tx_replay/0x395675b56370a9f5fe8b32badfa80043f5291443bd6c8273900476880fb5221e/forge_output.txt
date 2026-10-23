@@ -1,0 +1,24 @@
+Compiling 20 files with Solc 0.8.20
+Solc 0.8.20 finished in 1.03s
+Compiler run successful!
+
+Ran 1 test for src/_benchmark_eval/bench_220/bench_220_attack_tx_1.sol:bench_220_AttackTxReplay_395675b5
+[FAIL: patched contract still reproduces the historical attack tx] testHistoricalAttackTxReplay() (block: 12000164) (gas: 786492)
+Logs:
+  ATTACK_TX_BEFORE_OK
+  BEFORE_PROFIT: 268446856349364000973895
+  AFTER_PROFIT: 268446856349364000973895
+  AFTER_PROFIT: 268446856349364000973895
+
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 5.30s (5.29s CPU time)
+
+Ran 1 test suite in 5.30s (5.30s CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in src/_benchmark_eval/bench_220/bench_220_attack_tx_1.sol:bench_220_AttackTxReplay_395675b5
+[FAIL: patched contract still reproduces the historical attack tx] testHistoricalAttackTxReplay() (block: 12000164) (gas: 786492)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

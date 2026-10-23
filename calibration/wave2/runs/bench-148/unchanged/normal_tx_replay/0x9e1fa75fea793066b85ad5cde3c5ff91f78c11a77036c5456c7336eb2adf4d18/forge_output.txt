@@ -1,0 +1,12 @@
+Compiling 21 files with Solc 0.8.20
+Solc 0.8.20 finished in 1.14s
+Compiler run successful!
+
+Ran 1 test for src/_benchmark_eval/bench_148/bench_148_normal_tx_2.sol:bench_148_NormalTxReplay_9e1fa75f
+[PASS] testHistoricalNormalTxReplay() (gas: 350209)
+Logs:
+  NORMAL_TX_REPLAY_CHECKED
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 2.87s (2.87s CPU time)
+
+Ran 1 test suite in 2.87s (2.87s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

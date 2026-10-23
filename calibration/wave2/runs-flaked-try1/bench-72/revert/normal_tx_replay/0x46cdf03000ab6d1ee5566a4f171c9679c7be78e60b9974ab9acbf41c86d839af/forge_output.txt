@@ -1,0 +1,23 @@
+Compiling 21 files with Solc 0.8.20
+Solc 0.8.20 finished in 1.15s
+Compiler run successful!
+
+Ran 1 test for src/_benchmark_eval/bench_72/bench_72_normal_tx_2.sol:bench_72_NormalTxReplay_46cdf030
+[FAIL: logs changed: 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 != 0x853ab2437ea8843c6541eec33bf7dcdb3e1d4ebc30799fc7f3c592ec828b316d] testHistoricalNormalTxReplay() (block: 18752100) (gas: 546203)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 18.49s (18.49s CPU time)
+
+Ran 1 test suite in 18.50s (18.49s CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in src/_benchmark_eval/bench_72/bench_72_normal_tx_2.sol:bench_72_NormalTxReplay_46cdf030
+[FAIL: logs changed: 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 != 0x853ab2437ea8843c6541eec33bf7dcdb3e1d4ebc30799fc7f3c592ec828b316d] testHistoricalNormalTxReplay() (block: 18752100) (gas: 546203)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+[2m2026-10-23T11:33:34.383126Z[0m [31mERROR[0m [2msharedbackend[0m[2m:[0m Failed to send/recv `storage` [3merr[0m[2m=[0mfailed to get storage for 0x63C47c296B63bE888e9af376bd927C835014039f at 8: HTTP error 408 with body: {"id":244,"jsonrpc":"2.0","error":{"message":"Request timeout on the free plan, please upgrade to paid plan","code":30}}
+
+HTTP diagnostics:
+cf-ray: a4f06d6d1d73ab0d-LIS
+server: cloudflare [3maddress[0m[2m=[0m0x63C47c296B63bE888e9af376bd927C835014039f [3mindex[0m[2m=[0m8

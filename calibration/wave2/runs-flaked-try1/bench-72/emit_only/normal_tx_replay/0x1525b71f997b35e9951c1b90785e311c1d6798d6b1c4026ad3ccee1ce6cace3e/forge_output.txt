@@ -1,0 +1,23 @@
+Compiling 23 files with Solc 0.8.20
+Solc 0.8.20 finished in 1.33s
+Compiler run successful!
+
+Ran 1 test for src/_benchmark_eval/bench_72/bench_72_normal_tx_4.sol:bench_72_NormalTxReplay_1525b71f
+[FAIL: success changed: true != false] testHistoricalNormalTxReplay() (block: 18652142) (gas: 2967519)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 29.68s (29.68s CPU time)
+
+Ran 1 test suite in 29.69s (29.68s CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in src/_benchmark_eval/bench_72/bench_72_normal_tx_4.sol:bench_72_NormalTxReplay_1525b71f
+[FAIL: success changed: true != false] testHistoricalNormalTxReplay() (block: 18652142) (gas: 2967519)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
+[2m2026-10-23T11:36:43.000373Z[0m [31mERROR[0m [2msharedbackend[0m[2m:[0m Failed to send/recv `basic` [3merr[0m[2m=[0mfailed to get account for 0x4bF7664a5Deb8fbF24053545F8d0ec5617732819: HTTP error 408 with body: {"id":194,"jsonrpc":"2.0","error":{"message":"Request timeout on the free plan, please upgrade to paid plan","code":30}}
+
+HTTP diagnostics:
+cf-ray: a4f07207da2a979a-LIS
+server: cloudflare [3maddress[0m[2m=[0m0x4bF7664a5Deb8fbF24053545F8d0ec5617732819

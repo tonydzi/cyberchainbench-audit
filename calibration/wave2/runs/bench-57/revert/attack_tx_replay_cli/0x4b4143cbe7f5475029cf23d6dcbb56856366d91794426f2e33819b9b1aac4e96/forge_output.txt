@@ -1,0 +1,17 @@
+Compiling 20 files with Solc 0.8.20
+Solc 0.8.20 finished in 1.11s
+Compiler run successful!
+
+Ran 1 test for src/_benchmark_eval/bench_57/bench_57_attack_tx_1.sol:bench_57_AttackTxReplay_4b4143cb
+[PASS] testHistoricalAttackTxReplay() (gas: 23217020)
+Logs:
+  ATTACK_TX_BEFORE_OK
+  BEFORE_PROFIT: 149651557513241584741475
+  AFTER_PROFIT: 0
+  AFTER_PROFIT: 0
+  ATTACK_TX_BLOCKED
+  ATTACK_TX_REPLAY_CHECKED
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 18.13s (18.13s CPU time)
+
+Ran 1 test suite in 18.14s (18.13s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

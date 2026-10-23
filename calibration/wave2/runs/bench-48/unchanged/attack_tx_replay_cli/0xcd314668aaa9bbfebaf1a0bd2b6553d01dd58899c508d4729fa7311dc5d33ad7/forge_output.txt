@@ -1,0 +1,18 @@
+Compiling 20 files with Solc 0.8.20
+Solc 0.8.20 finished in 1.10s
+Compiler run successful!
+
+Ran 1 test for src/_benchmark_eval/bench_48/bench_48_attack_tx_1.sol:bench_48_AttackTxReplay_cd314668
+[FAIL: historical attack tx did not succeed before patch] testHistoricalAttackTxReplay() (block: 14602789) (gas: 7394276)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 18.40s (18.40s CPU time)
+
+Ran 1 test suite in 18.41s (18.40s CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in src/_benchmark_eval/bench_48/bench_48_attack_tx_1.sol:bench_48_AttackTxReplay_cd314668
+[FAIL: historical attack tx did not succeed before patch] testHistoricalAttackTxReplay() (block: 14602789) (gas: 7394276)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger
