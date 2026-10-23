@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.3, 2026-10-23
+
+Second patch-oracle calibration (wave 2), no model, no transaction: [calibration/wave2/README.md](calibration/wave2/README.md). (Numbered v2.3 because v2.2 was already taken by the arXiv comment below.)
+
+- The unmodified upstream `validate_patch` CLI at `1cb7410` on the other 47 Ethereum patch cases, three inputs each (unchanged, `revert()`, emit-only); every score is the CLI's `score` field, not the full benchmark scoring path.
+- 23 of 47 cases usable; 24 excluded with a named reason (14 harness, 10 baseline, 0 ineligible, 0 rpc). Seven of the baseline failures are `MemoryOOG`/`OutOfGas` on the unchanged recompile, cause not isolated.
+- Usable cases, score 1.0 (95% Wilson): unchanged 3 of 23 (4.5% to 32.1%), `revert()` 4 of 23 (7.0% to 37.1%), emit-only 3 of 16 (6.6% to 43.0%; 7 cases are `view`/`pure`). Emit-only counted as blocking the exploit in 16 of 16. Wave 1 + 2: 26 usable cases. No extrapolation to the 94.
+- Three hand-written reference fixes: bench-391 and bench-76 scored 1.0; bench-559 (constructor fix per its description) scored 0, as did our runtime variant.
+- One case (bench-220) re-run from scratch in a fresh clone: same verdicts. bench-72 re-run after an RPC error line, flaked logs kept.
+- New: `calibration/run_wave2.sh`, `wave2_table.py` (usability reason per case, Wilson intervals), `_test_wave2_table.py` (red-first, 9 checks), `parse_runs.py` gains `attack_reproduces`, `make_arms.py` accepts `library`. Articles (EN, RU) carry a "wave 2" section.
+- Not done: retry of the five wave-1 non-working cases, the 24 excluded wave-2 cases, an Etherscan-sourced run, the Harbor verifier.
+
 ## v2.2, 2026-10-23
 
 - `paper/`: a 5-page technical comment on arXiv:2606.26216, scoped to the claims `make` reproduces, built and checked with pdfLaTeX; arXiv upload package and metadata in `paper/ARXIV.md`.

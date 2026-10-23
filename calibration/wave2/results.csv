@@ -1,0 +1,105 @@
+usable,reason,case,arm,attack_txs,exploit_blocked,attack_compile_errors,profit_before,profit_after,checked_count,preserved_count,normal_compile_errors,oog,normal_ops_pass,oracle_score,oracle_exploit_blocked,oracle_normal_ops_pass,forge_sha256_16,score_lane_blocked,rpc_error_in_logs,attack_reproduces,lanes_disagree,profit_retained,agree_with_oracle
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-02,unchanged,1,False,0,,,3,3,0,False,True,0.0,False,False,329bc869a100daa5,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-02,revert,1,False,0,,,3,0,0,False,False,0.0,False,False,bf51a6b590f606ca,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-02,emit_only,1,False,0,,,3,0,0,False,False,0.0,False,False,fbf6f5bf115340c0,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-103,unchanged,1,False,0,,,3,0,0,False,False,0.0,False,False,981e1c14331329d1,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-103,revert,1,False,0,,,3,0,0,False,False,0.0,False,False,5d838041d4e4954f,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-103,emit_only,1,False,0,,,3,0,0,False,False,0.0,False,False,b8de30fe79804ba0,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-112,unchanged,1,False,0,,,3,3,0,False,True,0.0,False,False,c4ae2b22646c33d8,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-112,revert,1,False,0,,,3,0,0,False,False,0.0,False,False,8ea82a97a7f28214,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-112,emit_only,1,False,0,,,3,0,0,False,False,0.0,False,False,99d250af50573093,False,False,False,False,False,True
+True,usable,bench-117,unchanged,1,False,0,30684805397235438546535,30684805397235438546535,3,3,0,False,True,0.0,False,False,cb8a00f298196853,False,False,True,False,True,True
+True,usable,bench-117,revert,1,True,0,30684805397235438546535,30000000000000000000000,5,0,0,False,False,0.0,True,False,b03e0f43cf460b93,True,False,True,False,True,True
+True,usable,bench-117,emit_only,1,True,0,30684805397235438546535,30684805397235438546535,5,0,0,False,False,0.0,True,False,12a1a0431aca3f68,True,False,True,False,True,True
+False,harness: compile error in an arm,bench-136,unchanged,1,False,1,,,3,0,3,False,False,0.0,False,False,f0d1c3c3bd685ce9,False,False,False,False,False,True
+False,harness: compile error in an arm,bench-136,revert,1,False,1,,,3,0,3,False,False,0.0,False,False,7d4cd3dcc1c62616,False,False,False,False,False,True
+False,harness: compile error in an arm,bench-136,emit_only,1,False,1,,,3,0,3,False,False,0.0,False,False,f0d1c3c3bd685ce9,False,False,False,False,False,True
+True,usable (emit_only arm invalid: event cannot be emitted in a view/pure function),bench-148,unchanged,1,False,0,2728217605585847570239380,2728217605585847570239380,3,3,0,False,True,0.0,False,False,2ea11749e1c4c6f8,False,False,True,False,True,True
+True,usable (emit_only arm invalid: event cannot be emitted in a view/pure function),bench-148,revert,1,True,0,2728217605585847570239380,248293210167881070120800,5,0,0,False,False,0.0,True,False,07e9c3cef013b3ab,True,False,True,False,True,True
+False,harness: revert: oracle recompile of the staged sources fails (DeclarationError: Identifier already declared.); emit_only: oracle recompile of the staged sources fails (DeclarationError: Identifier already declared.),bench-151,unchanged,1,False,0,41329287681921476684198,41329287681921476684198,3,3,0,False,True,0.0,False,False,f0ca29c84ef858ee,False,False,True,False,True,True
+True,usable (emit_only arm invalid: event cannot be emitted in a view/pure function),bench-162,unchanged,1,True,0,233538289057404083918347,58903475527669301229326,5,1,0,False,False,0.0,True,False,1c26c7f122d0a644,True,False,True,False,True,True
+True,usable (emit_only arm invalid: event cannot be emitted in a view/pure function),bench-162,revert,1,True,0,233538289057404083918347,58903475527669301229326,5,1,0,False,False,0.0,True,False,86845a7d5bc4573a,True,False,True,False,True,True
+False,harness: revert: oracle recompile of the staged sources fails (contracts_CToken_CErc20Delegate.sol:10:28: DeclarationError: Identifier not found or not u); emit_only: oracle recompile of the staged sources fails (contracts_CToken,bench-181,unchanged,1,False,0,,,3,3,0,False,True,0.0,False,False,1b7c61cf6b5e187b,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-198,unchanged,1,False,0,,,3,0,0,False,False,0.0,False,False,889524a2233cd1ea,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-198,revert,1,False,0,,,3,0,0,False,False,0.0,False,False,be875fae69c3ba59,False,False,False,False,False,True
+False,harness: revert: oracle recompile of the staged sources fails (_C_Crypto_Projects_xstable_contracts_XST2.sol:18:1: DeclarationError: Identifier already d); emit_only: oracle recompile of the staged sources fails (_C_Crypto_Projec,bench-21,unchanged,1,False,0,366719437226089892175,366719437226089892175,3,3,0,False,True,0.0,False,False,07b9a3aaaa8113ef,False,False,True,False,True,True
+True,usable,bench-220,unchanged,1,False,0,268446856349364000973895,268446856349364000973895,3,3,0,False,True,0.0,False,False,d4f8b879a59c4052,False,False,True,False,True,True
+True,usable,bench-220,revert,1,True,0,268446856349364000973895,268446856349364000973895,5,5,0,False,True,1.0,True,True,cc1f3850c0c3cf42,True,False,True,False,True,True
+True,usable,bench-220,emit_only,1,True,0,268446856349364000973895,268446856349364000973895,5,5,0,False,True,1.0,True,True,1fd19afb92d5fe97,True,False,True,False,True,True
+True,usable,bench-23,unchanged,1,False,0,48701230166858812291287325,48701230166858812291287325,3,3,0,False,True,0.0,False,False,cd7cfaec069d3b55,False,False,True,False,True,True
+True,usable,bench-23,revert,1,True,0,48701230166858812291287325,500000002417223613775,5,0,0,False,False,0.0,True,False,badbd41e04e593c6,True,False,True,False,False,True
+True,usable,bench-23,emit_only,1,True,0,48701230166858812291287325,48701230166858812291287325,5,0,0,False,False,0.0,True,False,657f1d94a94ba3ba,True,False,True,False,True,True
+True,usable (emit_only arm invalid: event cannot be emitted in a view/pure function),bench-237,unchanged,1,True,0,75004912222611142112559186,53392337903948184386410,5,0,0,False,False,0.0,True,False,691fd0c4783385c1,True,False,True,False,False,True
+True,usable (emit_only arm invalid: event cannot be emitted in a view/pure function),bench-237,revert,1,True,0,75004912222611142112559186,53392337903948184386410,5,0,0,False,False,0.0,True,False,003a9a154010a6b5,True,False,True,False,False,True
+True,usable,bench-239,unchanged,1,True,0,1981315081640419711267499364,60000000000000000000000000,5,5,0,False,True,1.0,True,True,96f898f764386757,True,False,True,False,True,True
+True,usable,bench-239,revert,1,True,0,1981315081640419711267499364,60000000000000000000000000,5,5,0,False,True,1.0,True,True,0f2f729bc7e14c1b,True,False,True,False,True,True
+True,usable,bench-239,emit_only,1,True,0,1981315081640419711267499364,60000000000000000000000000,5,5,0,False,True,1.0,True,True,9cf9a2297ce9dd05,True,False,True,False,True,True
+False,harness: compile error in an arm,bench-252,unchanged,1,False,1,,,3,0,3,False,False,0.0,False,False,ad9af1c84a8ad5e8,False,False,False,False,False,True
+False,harness: compile error in an arm,bench-252,revert,1,False,1,,,3,0,3,False,False,0.0,False,False,ad9af1c84a8ad5e8,False,False,False,False,False,True
+False,harness: compile error in an arm,bench-252,emit_only,1,False,1,,,3,0,3,False,False,0.0,False,False,ad9af1c84a8ad5e8,False,False,False,False,False,True
+True,usable,bench-266,unchanged,1,False,0,181935854118092972816,181935854118092972816,3,3,0,False,True,0.0,False,False,ed35a526d73cbc49,False,False,True,False,True,True
+True,usable,bench-266,revert,1,True,0,181935854118092972816,197062155956105,5,0,0,False,False,0.0,True,False,547dfd2eee3b4007,True,False,True,False,False,True
+True,usable,bench-266,emit_only,1,True,0,181935854118092972816,181935854118092972816,5,0,0,False,False,0.0,True,False,0b829e317de3071c,True,False,True,False,True,True
+True,usable,bench-27,unchanged,1,True,0,10000000000,0,5,0,0,False,False,0.0,True,False,42e523987bac07b1,True,False,True,False,False,True
+True,usable,bench-27,revert,1,True,0,10000000000,0,5,0,0,False,False,0.0,True,False,688817570cfb5e3a,True,False,True,False,False,True
+True,usable,bench-27,emit_only,1,True,0,10000000000,0,5,0,0,False,False,0.0,True,False,0cccf1504da95078,True,False,True,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-31,unchanged,1,False,0,,,3,1,0,False,False,0.0,False,False,d2f748e6c049bde3,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-31,revert,1,False,0,,,3,1,0,False,False,0.0,False,False,ad68cd21b831d58f,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-31,emit_only,1,False,0,,,3,1,0,False,False,0.0,False,False,b0dfa4910c672088,False,False,False,False,False,True
+False,harness: revert: oracle recompile of the staged sources fails (contracts_interfaces_ILendingPoolCollateralManager.sol:10:1: DeclarationError: Declaration); emit_only: oracle recompile of the staged sources fails (contracts_interf,bench-336,unchanged,1,False,0,,,3,3,0,False,True,0.0,False,False,0c3e2d6c42d978c0,False,False,False,False,False,True
+True,usable (emit_only arm invalid: event cannot be emitted in a view/pure function),bench-34,unchanged,1,False,0,2016000000000000000000,2016000000000000000000,3,3,0,False,True,0.0,False,False,26fb53e7b37dcfee,False,False,True,False,True,True
+True,usable (emit_only arm invalid: event cannot be emitted in a view/pure function),bench-34,revert,1,True,0,2016000000000000000000,0,5,5,0,False,True,1.0,True,True,3b8e8a0a84535233,True,False,True,False,False,True
+True,usable,bench-36,unchanged,1,True,0,67236621642005519143463702159,0,5,4,0,False,False,0.0,True,False,b3bfbb5f9a4c33ac,True,False,True,False,False,True
+True,usable,bench-36,revert,1,True,0,67236621642005519143463702159,0,5,4,0,False,False,0.0,True,False,ac8bc0bcbc0b37d6,True,False,True,False,False,True
+True,usable,bench-36,emit_only,1,True,0,67236621642005519143463702159,0,5,4,0,False,False,0.0,True,False,f55f81bf0f08fd81,True,False,True,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-416,unchanged,1,False,0,,,3,0,0,False,False,0.0,False,False,1e34ebdf1573378b,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-416,revert,1,False,0,,,3,0,0,False,False,0.0,False,False,3087d07e15119cf0,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-416,emit_only,1,False,0,,,3,0,0,False,False,0.0,False,False,8d53b1deb6124f2e,False,False,False,False,False,True
+False,harness: revert: oracle recompile of the staged sources fails (DeclarationError: Declaration ); emit_only: oracle recompile of the staged sources fails (DeclarationError: Declaration ),bench-423,unchanged,1,False,0,,,3,3,0,False,True,0.0,False,False,bfbcbf9173630209,False,False,False,False,False,True
+True,usable,bench-428,unchanged,1,False,0,23087900000,23087900000,3,3,0,False,True,0.0,False,False,85100e04a9461f93,False,False,True,False,True,True
+True,usable,bench-428,revert,1,True,0,23087900000,0,5,0,0,False,False,0.0,True,False,00e2c58d52473be9,True,False,True,False,False,True
+True,usable,bench-428,emit_only,1,True,0,23087900000,23087900000,5,0,0,False,False,0.0,True,False,fec9ce3b31509563,True,False,True,False,True,True
+False,baseline: historical attack does not reproduce before the patch,bench-433,unchanged,1,False,0,,,3,0,0,False,False,0.0,False,False,9329d88c714cd4d3,False,False,False,False,False,True
+False,baseline: historical attack does not reproduce before the patch,bench-433,revert,1,False,0,,,3,0,0,False,False,0.0,False,False,61a40a33d4d7f91e,False,False,False,False,False,True
+False,baseline: historical attack does not reproduce before the patch,bench-433,emit_only,1,False,0,,,3,0,0,False,False,0.0,False,False,844d72132f62bd39,False,False,False,False,False,True
+False,baseline: historical attack does not reproduce before the patch,bench-434,unchanged,1,False,0,,,3,0,0,False,False,0.0,False,False,a1fdf02076285c1c,False,False,False,False,False,True
+False,baseline: historical attack does not reproduce before the patch,bench-434,revert,1,False,0,,,3,0,0,False,False,0.0,False,False,127208b1502209b0,False,False,False,False,False,True
+False,baseline: historical attack does not reproduce before the patch,bench-434,emit_only,1,False,0,,,3,0,0,False,False,0.0,False,False,90e53185c5d0bad7,False,False,False,False,False,True
+True,usable,bench-44,unchanged,1,True,0,1916820667684461472322111,50000001180529839840286,5,0,0,False,False,0.0,True,False,a9a4a246006728a7,True,False,True,False,True,True
+True,usable,bench-44,revert,1,True,0,1916820667684461472322111,50000001180529839840286,5,0,0,False,False,0.0,True,False,c3caf427bb6490e0,True,False,True,False,True,True
+True,usable,bench-44,emit_only,1,True,0,1916820667684461472322111,50000001180529839840286,5,0,0,False,False,0.0,True,False,a52f7efaa4cbac33,True,False,True,False,True,True
+False,harness: revert: oracle recompile of the staged sources fails (contracts_farm_facets_GovernanceFacet_GovernanceFacet.sol:17:1: DeclarationError: Identifi); emit_only: oracle recompile of the staged sources fails (contracts_farm_f,bench-48,unchanged,1,False,0,,,3,3,0,False,True,0.0,False,False,0864807cc1c26321,False,False,False,False,False,True
+True,usable,bench-515,unchanged,1,False,0,12322108091163959727145349,12322108091163959727145349,2,2,0,False,True,0.0,False,False,878c21d54da01b99,False,False,True,False,True,True
+True,usable,bench-515,revert,1,True,0,12322108091163959727145349,6162597909817710312352551,4,4,0,False,True,1.0,True,True,bf543ac71306a116,True,False,True,False,True,True
+True,usable,bench-515,emit_only,1,True,0,12322108091163959727145349,12322108091163959727145349,4,4,0,False,True,1.0,True,True,9ab420858f018516,True,False,True,False,True,True
+False,baseline: attack still passes after revert() in the vulnerable function,bench-518,unchanged,1,False,0,0,0,3,3,0,False,True,0.0,False,False,297fbca1409c6a86,False,False,True,False,False,True
+False,baseline: attack still passes after revert() in the vulnerable function,bench-518,revert,1,False,0,0,0,3,3,0,False,True,0.0,False,False,fb0f1741e880bd93,False,False,True,False,False,True
+False,baseline: attack still passes after revert() in the vulnerable function,bench-518,emit_only,1,False,0,0,0,3,3,0,False,True,0.0,False,False,abbf8a389960cf4c,False,False,True,False,False,True
+False,harness: revert: oracle recompile of the staged sources fails (DeclarationError: Declaration ); emit_only: oracle recompile of the staged sources fails (DeclarationError: Declaration ),bench-524,unchanged,1,False,0,,,3,3,0,False,True,0.0,False,False,a80c39a28ed1b3ed,False,False,False,False,False,True
+True,usable (emit_only arm invalid: event cannot be emitted in a view/pure function),bench-53,unchanged,1,False,0,173600000000000000000000,173600000000000000000000,3,3,0,False,True,0.0,False,False,beeab1c575b03515,False,False,True,False,True,True
+True,usable (emit_only arm invalid: event cannot be emitted in a view/pure function),bench-53,revert,1,True,0,173600000000000000000000,0,5,0,0,False,False,0.0,True,False,635a1b38dad8c563,True,False,True,False,False,True
+True,usable,bench-534,unchanged,1,True,0,774047682824429591249043,0,5,5,0,False,True,1.0,True,True,794acb271b109d2f,True,False,True,False,False,True
+True,usable,bench-534,revert,1,True,0,774047682824429591249043,0,5,0,0,False,False,0.0,True,False,a7c0a6ac09df8369,True,False,True,False,False,True
+True,usable,bench-534,emit_only,1,True,0,774047682824429591249043,0,5,0,0,False,False,0.0,True,False,9123fba29eb42c68,True,False,True,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-562,unchanged,1,False,0,,,3,3,0,False,True,0.0,False,False,eebd31600a3da72a,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-562,revert,1,False,0,,,3,3,0,False,True,0.0,False,False,cc879974cd9fc707,False,False,False,False,False,True
+False,baseline: attack replay hits MemoryOOG/OutOfGas on the unchanged recompile (cause not isolated),bench-562,emit_only,1,False,0,,,3,3,0,False,True,0.0,False,False,91f9b0262bc98430,False,False,False,False,False,True
+True,usable (emit_only arm invalid: event cannot be emitted in a view/pure function),bench-565,unchanged,1,True,0,265155856008758898,265155626006272228,2,0,0,False,False,0.0,True,False,a5fd0c33fd9acf1a,True,False,True,False,True,True
+True,usable (emit_only arm invalid: event cannot be emitted in a view/pure function),bench-565,revert,1,True,0,265155856008758898,265155626006272228,2,0,0,False,False,0.0,True,False,a9bdf2d37df6d266,True,False,True,False,True,True
+True,usable,bench-567,unchanged,1,True,0,241798153114414841113489,142549195878507877396936,5,5,0,False,True,1.0,True,True,3753db045c490062,True,False,True,False,True,True
+True,usable,bench-567,revert,1,True,0,241798153114414841113489,70000000000000000,5,4,0,False,False,0.0,True,False,3d484cdec3405d4b,True,False,True,False,False,True
+True,usable,bench-567,emit_only,1,True,0,241798153114414841113489,142549195878507877396936,5,4,0,False,False,0.0,True,False,134d615d3353016b,True,False,True,False,True,True
+True,usable,bench-57,unchanged,1,True,0,149651557513241584741475,0,5,0,0,False,False,0.0,True,False,8a9264cf04926ce5,True,False,True,False,False,True
+True,usable,bench-57,revert,1,True,0,149651557513241584741475,0,5,0,0,False,False,0.0,True,False,aa3e73e78e0ec0b6,True,False,True,False,False,True
+True,usable,bench-57,emit_only,1,True,0,149651557513241584741475,0,5,0,0,False,False,0.0,True,False,a0ac355918ed0fe9,True,False,True,False,False,True
+True,usable,bench-72,unchanged,1,False,0,218815388669004415363855245,218815388669004415363855245,3,1,0,False,False,0.0,False,False,9bfa55349d2eef2a,False,False,True,False,True,True
+True,usable,bench-72,revert,1,True,0,218815388669004415363855245,108782553955244895912373011,5,1,0,False,False,0.0,True,False,cd9ca2c642d011d1,True,False,True,False,True,True
+True,usable,bench-72,emit_only,1,True,0,218815388669004415363855245,218815388669004415363855245,5,1,0,False,False,0.0,True,False,6f98680b61d445e0,True,False,True,False,True,True
+True,usable (emit_only arm invalid: event cannot be emitted in a view/pure function),bench-77,unchanged,1,True,0,193093996372052852043168,96194184103080057543669,5,0,0,False,False,0.0,True,False,43a005d3d59b6370,True,False,True,False,True,True
+True,usable (emit_only arm invalid: event cannot be emitted in a view/pure function),bench-77,revert,1,True,0,193093996372052852043168,96194184103080057543669,5,0,0,False,False,0.0,True,False,717960eb4e56bebc,True,False,True,False,True,True
+True,usable,bench-80,unchanged,1,True,0,69138058302051553990380660960,0,5,0,0,False,False,0.0,True,False,804a02ca8135a846,True,False,True,False,False,True
+True,usable,bench-80,revert,1,True,0,69138058302051553990380660960,0,5,0,0,False,False,0.0,True,False,2b3447b21ac3b0b9,True,False,True,False,False,True
+True,usable,bench-80,emit_only,1,True,0,69138058302051553990380660960,0,5,0,0,False,False,0.0,True,False,d5e903674c15cb4f,True,False,True,False,False,True
+True,usable,bench-84,unchanged,1,False,0,19392277118050930170440,19392277118050930170440,3,3,0,False,True,0.0,False,False,ad95c76cb281b55d,False,False,True,False,True,True
+True,usable,bench-84,revert,1,True,0,19392277118050930170440,0,5,0,0,False,False,0.0,True,False,343ffd89022ebcae,True,False,True,False,False,True
+True,usable,bench-84,emit_only,1,True,0,19392277118050930170440,19392277118050930170440,5,0,0,False,False,0.0,True,False,3ef26df00fa492a5,True,False,True,False,True,True

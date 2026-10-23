@@ -1,0 +1,18 @@
+Compiling 21 files with Solc 0.8.20
+Solc 0.8.20 finished in 1.16s
+Compiler run successful!
+
+Ran 1 test for src/_benchmark_eval/bench_534/bench_534_normal_tx_2.sol:bench_534_NormalTxReplay_4c0fa70c
+[FAIL: logs changed: 0x4f91947f12deda0ebe0f4ad61255c015d05a1f041c03731122fdfc5ad99e0177 != 0x2d6f921223d50c3e690e3a03f9c4ab0fab9019ff7ba1ac5cb35de19c20d32857] testHistoricalNormalTxReplay() (block: 15811388) (gas: 4122336)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 9.02s (9.02s CPU time)
+
+Ran 1 test suite in 9.03s (9.02s CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in src/_benchmark_eval/bench_534/bench_534_normal_tx_2.sol:bench_534_NormalTxReplay_4c0fa70c
+[FAIL: logs changed: 0x4f91947f12deda0ebe0f4ad61255c015d05a1f041c03731122fdfc5ad99e0177 != 0x2d6f921223d50c3e690e3a03f9c4ab0fab9019ff7ba1ac5cb35de19c20d32857] testHistoricalNormalTxReplay() (block: 15811388) (gas: 4122336)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

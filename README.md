@@ -169,10 +169,21 @@ and an emit-only patch that leaves the attacker's profit untouched; bench-76: th
 other 5 cases could not score any patch in this setup. One run's score was flipped by an RPC error. Details,
 logs and caveats: [calibration/results.md](calibration/results.md). Reproduce with `calibration/run_all.sh`.
 
+## Second measurement (v2.3, 2026-10-23)
+
+Same unmodified `validate_patch` CLI, same three inputs, no model, on the other 47 Ethereum patch cases. All
+numbers are the CLI's `score` field, not the benchmark's full scoring path. **23 of 47 cases were usable** (attack
+reproduces before the patch, `revert()` blocks it, no compile or RPC error); 24 are excluded with a named reason
+(14 harness, 10 baseline). On the usable cases a score of 1.0 went to the unchanged source in 3 of 23 (95% Wilson
+4.5% to 32.1%), to `revert()` in 4 of 23 (7.0% to 37.1%), to an event-only change in 3 of 16 (6.6% to 43.0%;
+7 cases are `view`/`pure`). The event-only input was counted as blocking the exploit in 16 of 16 runs. Hand-written
+reference fixes: 2 of 3 scored 1.0 (bench-559's constructor fix scored 0). One case re-run from scratch in a fresh
+clone matched. No extrapolation to the 94 cases. Details: [calibration/wave2/README.md](calibration/wave2/README.md),
+table [calibration/wave2/results.md](calibration/wave2/results.md), reproduce with `calibration/run_wave2.sh`.
+
 ## The next measurement
 
-Not done: the other 47 Ethereum cases, a hand-written reference fix on a few cases (to measure how often a
-correct patch fails), an Etherscan-sourced run (this one used Sourcify), BSC (no free archive RPC found), and
+Not done: the 24 excluded Ethereum cases, more hand-written reference fixes (3 so far), an Etherscan-sourced run (this one used Sourcify), BSC (no free archive RPC found), and
 the Harbor verifier path. Only after that is a paid model run worth it: Table 5 puts patch at $0.06-$21.86 per
 case, about $217 for Codex × GPT-5.5 on 94 cases.
 

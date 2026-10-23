@@ -34,7 +34,7 @@ if len(m) > 1:
 brace = text.index("{", m[0].end())
 # skip over a possible `{` inside the parameter list is not an issue (no braces in params)
 contract_open = None
-for cm in re.finditer(r"^[ \t]*(?:abstract\s+)?contract\s+\w+(?:\s+is\s+[^{;]+)?\s*\{", text, re.M):
+for cm in re.finditer(r"^[ \t]*(?:abstract\s+)?(?:contract|library)\s+\w+(?:\s+is\s+[^{;]+)?\s*\{", text, re.M):
     if cm.end() < m[0].start():
         contract_open = cm.end()
 assert contract_open is not None, "no enclosing contract found"

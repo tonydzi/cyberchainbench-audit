@@ -1,0 +1,109 @@
+{
+  "case_id": "bench-151",
+  "case_name": "EarningFram",
+  "patched_path": "$CCB/arms/bench-151/revert.sol",
+  "score": 0.0,
+  "best_score": 0.0,
+  "iteration": 2,
+  "summary": "patched code compiled, but the exploit still passed",
+  "diagnostic_notes": [
+    "used historical attack-tx replay lane because no verification exploit harness was available",
+    "attack-tx replay validation error: failed to compile fixed bytecode: DeclarationError: Identifier already declared.\n  --> contracts_core_Vault.sol:17:1:\n   |\n17 | contract EFVault is IVault, Initializable, ERC20Upgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {\n   | ^ (Relevant source part starts here and spans across multiple lines).\nNote: The previous declaration is here:\n --> contracts_core_Vault.sol:4:1:\n  |\n4 | import \"./@openzeppelin_contracts-upgradeable_access_OwnableUpgradeable.sol\";\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\n\n> command: `$HOME/.solcx/solc-v0.8.3 --standard-json`\n> return code: `0`\n> stdout:\n{\"errors\":[{\"component\":\"general\",\"errorCode\":\"2333\",\"formattedMessage\":\"DeclarationError: Identifier already declared.\\n  --> contracts_core_Vault.sol:17:1:\\n   |\\n17 | contract EFVault is IVault, Initializable, ERC20Upgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {\\n   | ^ (Relevant source part starts here and spans across multiple lines).\\nNote: The previous declaration is here:\\n --> contracts_core_Vault.sol:4:1:\\n  |\\n4 | import \\\"./@openzeppelin_contracts-upgradeable_access_OwnableUpgradeable.sol\\\";\\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n\\n\",\"message\":\"Identifier already declared.\",\"secondarySourceLocations\":[{\"end\":134,\"file\":\"contracts_core_Vault.sol\",\"message\":\"The previous declaration is here:\",\"start\":57}],\"severity\":\"error\",\"sourceLocation\":{\"end\":6792,\"file\":\"contracts_core_Vault.sol\",\"start\":789},\"type\":\"DeclarationError\"}],\"sources\":{\"@openzeppelin_contracts-upgradeable_access_OwnableUpgradeable.sol\":{\"id\":0},\"@openzeppelin_contracts-upgradeable_proxy_utils_Initializable.sol\":{\"id\":1},\"@openzeppelin_contracts-upgradeable_security_ReentrancyGuardUpgradeable.sol\":{\"id\":2},\"@openzeppelin_contracts-upgradeable_token_ERC20_ERC20Upgradeable.sol\":{\"id\":3},\"@openzeppelin_contracts-upgradeable_token_ERC20_IERC20Upgradeable.sol\":{\"id\":4},\"@openzeppelin_contracts-upgradeable_token_ERC20_extensions_IERC20MetadataUpgradeable.sol\":{\"id\":5},\"@openzeppelin_contracts-upgradeable_token_ERC20_extensions_draft-IERC20PermitUpgradeable.sol\":{\"id\":6},\"@openzeppelin_contracts-upgradeable_token_ERC20_utils_SafeERC20Upgradeable.sol\":{\"id\":7},\"@openzeppelin_contracts-upgradeable_utils_AddressUpgradeable.sol\":{\"id\":8},\"@openzeppelin_contracts-upgradeable_utils_ContextUpgradeable.sol\":{\"id\":9},\"@openzeppelin_contracts_utils_math_SafeMath.sol\":{\"id\":10},\"contracts_core_Vault.sol\":{\"id\":11},\"contracts_interfaces_IController.sol\":{\"id\":12},\"contracts_interfaces_IVault.sol\":{\"id\":13},\"contracts_utils_TransferHelper.sol\":{\"id\":14},\"hardhat_console.sol\":{\"id\":15}}}\n\n> stderr:",
+    "exploit still passes; skipping normal-tx replay"
+  ],
+  "compiles": true,
+  "exploit_blocked": false,
+  "normal_ops_pass": false,
+  "plan_only": false,
+  "classification_present": true,
+  "patch_possible": true,
+  "required_authority": "",
+  "fix_confidence": "",
+  "fix_rationale": "",
+  "target_contracts": [],
+  "expected_target_contracts": [
+    "EFVault"
+  ],
+  "proxy_target_matched": true,
+  "proxy_detected": false,
+  "proxy_kind": "",
+  "proxy_implementation": "",
+  "proxy_admin": "",
+  "compile_error": "",
+  "test_output": "failed to compile fixed bytecode: DeclarationError: Identifier already declared.\n  --> contracts_core_Vault.sol:17:1:\n   |\n17 | contract EFVault is IVault, Initializable, ERC20Upgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {\n   | ^ (Relevant source part starts here and spans across multiple lines).\nNote: The previous declaration is here:\n --> contracts_core_Vault.sol:4:1:\n  |\n4 | import \"./@openzeppelin_contracts-upgradeable_access_OwnableUpgradeable.sol\";\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\n\n> command: `$HOME/.solcx/solc-v0.8.3 --standard-json`\n> return code: `0`\n> stdout:\n{\"errors\":[{\"component\":\"general\",\"errorCode\":\"2333\",\"formattedMessage\":\"DeclarationError: Identifier already declared.\\n  --> contracts_core_Vault.sol:17:1:\\n   |\\n17 | contract EFVault is IVault, Initializable, ERC20Upgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {\\n   | ^ (Relevant source part starts here and spans across multiple lines).\\nNote: The previous declaration is here:\\n --> contracts_core_Vault.sol:4:1:\\n  |\\n4 | import \\\"./@openzeppelin_contracts-upgradeable_access_OwnableUpgradeable.sol\\\";\\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n\\n\",\"message\":\"Identifier already declared.\",\"secondarySourceLocations\":[{\"end\":134,\"file\":\"contracts_core_Vault.sol\",\"message\":\"The previous declaration is here:\",\"start\":57}],\"severity\":\"error\",\"sourceLocation\":{\"end\":6792,\"file\":\"contracts_core_Vault.sol\",\"start\":789},\"type\":\"DeclarationError\"}],\"sources\":{\"@openzeppelin_contracts-upgradeable_access_OwnableUpgradeable.sol\":{\"id\":0},\"@openzeppelin_contracts-upgradeable_proxy_utils_Initializable.sol\":{\"id\":1},\"@openzeppelin_contracts-upgradeable_security_ReentrancyGuardUpgradeable.sol\":{\"id\":2},\"@openzeppelin_contracts-upgradeable_token_ERC20_ERC20Upgradeable.sol\":{\"id\":3},\"@openzeppelin_contracts-upgradeable_token_ERC20_IERC20Upgradeable.sol\":{\"id\":4},\"@openzeppelin_contracts-upgradeable_token_ERC20_extensions_IERC20MetadataUpgradeable.sol\":{\"id\":5},\"@openzeppelin_contracts-upgradeable_token_ERC20_extensions_draft-IERC20PermitUpgradeable.sol\":{\"id\":6},\"@openzeppelin_contracts-upgradeable_token_ERC20_utils_SafeERC20Upgradeable.sol\":{\"id\":7},\"@openzeppelin_contracts-upgradeable_utils_AddressUpgradeable.sol\":{\"id\":8},\"@openzeppelin_contracts-upgradeable_utils_ContextUpgradeable.sol\":{\"id\":9},\"@openzeppelin_contracts_utils_math_SafeMath.sol\":{\"id\":10},\"contracts_core_Vault.sol\":{\"id\":11},\"contracts_interfaces_IController.sol\":{\"id\":12},\"contracts_interfaces_IVault.sol\":{\"id\":13},\"contracts_utils_TransferHelper.sol\":{\"id\":14},\"hardhat_console.sol\":{\"id\":15}}}\n\n> stderr:",
+  "regression_output": "",
+  "artifact_dir": "$CCB/runs/bench-151/revert",
+  "response_path": "$CCB/runs/bench-151/revert/raw_response.txt",
+  "score_path": "$CCB/runs/bench-151/revert/score.json",
+  "patched_code_path": "$CCB/runs/bench-151/revert/patched_code.sol",
+  "harness_path": "",
+  "regression_path": "",
+  "forge_output_path": "",
+  "regression_output_path": "",
+  "attack_tx_replay": {
+    "ok": false,
+    "case_id": "bench-151",
+    "case_name": "EarningFram",
+    "chain": "ethereum",
+    "contract_address": "0x863e572b215fd67c855d973f870266cf827aea5e",
+    "fixed_path": "$CCB/arms/bench-151/revert.sol",
+    "selection_mode": "case_attack_txs",
+    "selected_transactions": [
+      {
+        "tx_hash": "0x6e6e556a5685980317cb2afdb628ed4a845b3cbd1c98bdaffd0561cb2c4790fa",
+        "from": "0xee4b3dd20902fa3539706f25005fa51d3b7bdf1b",
+        "to": "0xfe141c32e36ba7601d128f0c39dedbe0f6abb983",
+        "input": "0x337e80b40000000000000000000000005655c442227371267c165101048e4838a762675d00000000000000000000000088e6a0c2ddd26feeb64f039a2c41296fcb3f564000000000000000000000000000000000000000000000021e19e0c9bab2400000",
+        "value_wei": 0,
+        "block_number": 17875886,
+        "is_creation": false
+      }
+    ],
+    "results": [],
+    "error": "failed to compile fixed bytecode: DeclarationError: Identifier already declared.\n  --> contracts_core_Vault.sol:17:1:\n   |\n17 | contract EFVault is IVault, Initializable, ERC20Upgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {\n   | ^ (Relevant source part starts here and spans across multiple lines).\nNote: The previous declaration is here:\n --> contracts_core_Vault.sol:4:1:\n  |\n4 | import \"./@openzeppelin_contracts-upgradeable_access_OwnableUpgradeable.sol\";\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\n\n> command: `$HOME/.solcx/solc-v0.8.3 --standard-json`\n> return code: `0`\n> stdout:\n{\"errors\":[{\"component\":\"general\",\"errorCode\":\"2333\",\"formattedMessage\":\"DeclarationError: Identifier already declared.\\n  --> contracts_core_Vault.sol:17:1:\\n   |\\n17 | contract EFVault is IVault, Initializable, ERC20Upgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {\\n   | ^ (Relevant source part starts here and spans across multiple lines).\\nNote: The previous declaration is here:\\n --> contracts_core_Vault.sol:4:1:\\n  |\\n4 | import \\\"./@openzeppelin_contracts-upgradeable_access_OwnableUpgradeable.sol\\\";\\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n\\n\",\"message\":\"Identifier already declared.\",\"secondarySourceLocations\":[{\"end\":134,\"file\":\"contracts_core_Vault.sol\",\"message\":\"The previous declaration is here:\",\"start\":57}],\"severity\":\"error\",\"sourceLocation\":{\"end\":6792,\"file\":\"contracts_core_Vault.sol\",\"start\":789},\"type\":\"DeclarationError\"}],\"sources\":{\"@openzeppelin_contracts-upgradeable_access_OwnableUpgradeable.sol\":{\"id\":0},\"@openzeppelin_contracts-upgradeable_proxy_utils_Initializable.sol\":{\"id\":1},\"@openzeppelin_contracts-upgradeable_security_ReentrancyGuardUpgradeable.sol\":{\"id\":2},\"@openzeppelin_contracts-upgradeable_token_ERC20_ERC20Upgradeable.sol\":{\"id\":3},\"@openzeppelin_contracts-upgradeable_token_ERC20_IERC20Upgradeable.sol\":{\"id\":4},\"@openzeppelin_contracts-upgradeable_token_ERC20_extensions_IERC20MetadataUpgradeable.sol\":{\"id\":5},\"@openzeppelin_contracts-upgradeable_token_ERC20_extensions_draft-IERC20PermitUpgradeable.sol\":{\"id\":6},\"@openzeppelin_contracts-upgradeable_token_ERC20_utils_SafeERC20Upgradeable.sol\":{\"id\":7},\"@openzeppelin_contracts-upgradeable_utils_AddressUpgradeable.sol\":{\"id\":8},\"@openzeppelin_contracts-upgradeable_utils_ContextUpgradeable.sol\":{\"id\":9},\"@openzeppelin_contracts_utils_math_SafeMath.sol\":{\"id\":10},\"contracts_core_Vault.sol\":{\"id\":11},\"contracts_interfaces_IController.sol\":{\"id\":12},\"contracts_interfaces_IVault.sol\":{\"id\":13},\"contracts_utils_TransferHelper.sol\":{\"id\":14},\"hardhat_console.sol\":{\"id\":15}}}\n\n> stderr:",
+    "report_path": "$CCB/runs/bench-151/revert/attack_tx_replay_cli/attack_tx_replay.json"
+  },
+  "historical_attack_txs_checked": 0,
+  "historical_attack_txs_blocked": 0,
+  "historical_attack_txs_all_blocked": false,
+  "normal_tx_replay": {
+    "ok": false,
+    "case_id": "bench-151",
+    "case_name": "EarningFram",
+    "chain": "ethereum",
+    "contract_address": "0x863e572b215fd67c855d973f870266cf827aea5e",
+    "fixed_path": "$CCB/arms/bench-151/revert.sol",
+    "selection_mode": "static",
+    "selected_transactions": [
+      {
+        "tx_hash": "0xccb04fa825c3049835cd1f63b663e18a41fed5c2ddc8c8fdc2a60db53ede7531",
+        "from": "0xc3fd2bcb524af31963b3e3bb670f28ba14718244",
+        "to": "0xeb7621b1119fb5a77df8a9758ca946fc213c611a",
+        "input": "0x00f714ce00000000000000000000000000000000000000000000000000000000035bd530000000000000000000000000c3fd2bcb524af31963b3e3bb670f28ba14718244",
+        "value_wei": 0,
+        "block_number": 17868764
+      },
+      {
+        "tx_hash": "0x320be7d8853a744644489e5aa1ad2e064453ad1375204fd7abaff5d957e9d0db",
+        "from": "0xc3fd2bcb524af31963b3e3bb670f28ba14718244",
+        "to": "0x5655c442227371267c165101048e4838a762675d",
+        "input": "0x00f714ce0000000000000000000000000000000000000000000000004d8faccf8e712b57000000000000000000000000c3fd2bcb524af31963b3e3bb670f28ba14718244",
+        "value_wei": 0,
+        "block_number": 17868755
+      },
+      {
+        "tx_hash": "0x4b1e2627ccd8d75982a79328791bf6e4839a1382383f6e2d3313f6a5779dd1cd",
+        "from": "0xf4dfcd61c36fc3ac374e52206c43253e14c2ffe2",
+        "to": "0x5655c442227371267c165101048e4838a762675d",
+        "input": "0xa9059cbb000000000000000000000000c3fd2bcb524af31963b3e3bb670f28ba14718244000000000000000000000000000000000000000000000000463c22f51836145e",
+        "value_wei": 0,
+        "block_number": 17868734
+      }
+    ],
+    "results": [],
+    "error": "failed to compile fixed bytecode: DeclarationError: Identifier already declared.\n  --> contracts_core_Vault.sol:17:1:\n   |\n17 | contract EFVault is IVault, Initializable, ERC20Upgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {\n   | ^ (Relevant source part starts here and spans across multiple lines).\nNote: The previous declaration is here:\n --> contracts_core_Vault.sol:4:1:\n  |\n4 | import \"./@openzeppelin_contracts-upgradeable_access_OwnableUpgradeable.sol\";\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\n\n> command: `$HOME/.solcx/solc-v0.8.3 --standard-json`\n> return code: `0`\n> stdout:\n{\"errors\":[{\"component\":\"general\",\"errorCode\":\"2333\",\"formattedMessage\":\"DeclarationError: Identifier already declared.\\n  --> contracts_core_Vault.sol:17:1:\\n   |\\n17 | contract EFVault is IVault, Initializable, ERC20Upgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {\\n   | ^ (Relevant source part starts here and spans across multiple lines).\\nNote: The previous declaration is here:\\n --> contracts_core_Vault.sol:4:1:\\n  |\\n4 | import \\\"./@openzeppelin_contracts-upgradeable_access_OwnableUpgradeable.sol\\\";\\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n\\n\",\"message\":\"Identifier already declared.\",\"secondarySourceLocations\":[{\"end\":134,\"file\":\"contracts_core_Vault.sol\",\"message\":\"The previous declaration is here:\",\"start\":57}],\"severity\":\"error\",\"sourceLocation\":{\"end\":6792,\"file\":\"contracts_core_Vault.sol\",\"start\":789},\"type\":\"DeclarationError\"}],\"sources\":{\"@openzeppelin_contracts-upgradeable_access_OwnableUpgradeable.sol\":{\"id\":0},\"@openzeppelin_contracts-upgradeable_proxy_utils_Initializable.sol\":{\"id\":1},\"@openzeppelin_contracts-upgradeable_security_ReentrancyGuardUpgradeable.sol\":{\"id\":2},\"@openzeppelin_contracts-upgradeable_token_ERC20_ERC20Upgradeable.sol\":{\"id\":3},\"@openzeppelin_contracts-upgradeable_token_ERC20_IERC20Upgradeable.sol\":{\"id\":4},\"@openzeppelin_contracts-upgradeable_token_ERC20_extensions_IERC20MetadataUpgradeable.sol\":{\"id\":5},\"@openzeppelin_contracts-upgradeable_token_ERC20_extensions_draft-IERC20PermitUpgradeable.sol\":{\"id\":6},\"@openzeppelin_contracts-upgradeable_token_ERC20_utils_SafeERC20Upgradeable.sol\":{\"id\":7},\"@openzeppelin_contracts-upgradeable_utils_AddressUpgradeable.sol\":{\"id\":8},\"@openzeppelin_contracts-upgradeable_utils_ContextUpgradeable.sol\":{\"id\":9},\"@openzeppelin_contracts_utils_math_SafeMath.sol\":{\"id\":10},\"contracts_core_Vault.sol\":{\"id\":11},\"contracts_interfaces_IController.sol\":{\"id\":12},\"contracts_interfaces_IVault.sol\":{\"id\":13},\"contracts_utils_TransferHelper.sol\":{\"id\":14},\"hardhat_console.sol\":{\"id\":15}}}\n\n> stderr:"
+  },
+  "historical_normal_txs_checked": 0,
+  "historical_normal_txs_preserved": 0,
+  "historical_normal_txs_all_preserved": false
+}

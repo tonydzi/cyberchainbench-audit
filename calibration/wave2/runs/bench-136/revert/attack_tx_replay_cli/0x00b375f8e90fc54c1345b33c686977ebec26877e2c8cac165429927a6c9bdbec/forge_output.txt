@@ -1,0 +1,6 @@
+Error: Compiler run failed:
+Error (8936): Invalid use of number separator '_'.
+  --> src/_benchmark_eval/bench_136/bench_136_attack_tx_1.sol:14:35:
+   |
+14 |         bytes memory _fixedCode = hex"6080604052600436106101405760003 ... 091010152600101610dee565b50600073__$58c69bfa550d4fee8cf34471a1c8143860 ...
+   |                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

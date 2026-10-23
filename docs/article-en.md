@@ -94,6 +94,24 @@ Two harness bugs showed up as measurements rather than readings. A transient err
 
 A second run of bench-391 from a fresh clone gave the same three verdicts. The scores and profits above are in the raw forge logs under `calibration/runs/`, parsed by a script whose test breaks real logs and checks that the answer changes; byte sizes come from `calibration/bytecode_diff.jsonl` and compiler settings from Sourcify. I re-read the key logs, code lines and the Sourcify record myself before writing this.
 
+## Pass four, wave 2: the same command on 47 more cases
+
+A second wave ran the same unmodified `validate_patch` command, with the same three inputs and still no model, on the other 47 Ethereum patch cases. Every score below is the `score` field of that command, not the benchmark's full scoring path, which was not run. A case counts as usable only if, for the unchanged and `revert()` inputs, the historical attack reproduces before the patch, nothing fails to compile, no RPC error shows in the logs, and the bare `revert()` input blocks the attack, so that the blocking check can be satisfied at all. By that test 23 of the 47 are usable. The other 24 are excluded with a named reason in `calibration/wave2/results.md`: 14 harness failures (our arm builder found no matching Solidity function in 5, the command's own recompile of the Sourcify sources failed in 7, forge compile errors in 2), and 10 baseline failures: in 9 the attack does not replay even before patching, seven of those with `MemoryOOG` or `OutOfGas` on the unchanged recompiled source, and in 1 it still passes after `revert()`. I did not isolate that cause; raising forge's memory limit changed nothing in one probe.
+
+On the 23 usable cases, with 95% Wilson intervals:
+
+- **Unchanged source: 1.0 in 3 of 23** (4.5% to 32.1%).
+- **Bare `revert()`: 1.0 in 4 of 23** (7.0% to 37.1%).
+- **One event added, nothing else: 1.0 in 3 of 16** (6.6% to 43.0%). In 7 of the 23 the function is `view` or `pure`, where an event cannot be emitted, so that input does not exist there.
+
+Together with wave 1 that is 26 usable cases and 4, 5 and 4 scores of 1.0 for the three inputs. These are counts on a specific set of cases, not a rate over the 94 in the paper's evaluation subset, and I make no extrapolation to it.
+
+The more telling number is the blocking rule. The added event was counted as blocking the exploit in all 16 of 16 runs (80.6% to 100%), and in 8 of 16 the attacker's profit was exactly the same number before and after. In all 13 runs of this input that scored 0, the legitimate replay was not fully preserved: the forge output names `logs changed` in 8 of them and `success changed` in 1, and 4 fail with a message I did not categorise. Three runs scored 1.0. Unchanged source scored 1.0 in bench-239, bench-534 and bench-567; bench-567 is the case in upstream issue #8.
+
+I also wrote three reference fixes by hand from each case's `fix_description`. Two scored 1.0 (bench-391, access control on `setRegistry`; bench-76, `initialize` limited to the proxy admin). One scored 0: bench-559, where the description's fix is in the constructor, which does not run when the recompiled runtime is written over the deployed state (the likely reason, not an isolated cause). A runtime variant I wrote for it also scored 0 and I did not diagnose why. Two of three passing is a pilot, not a rate.
+
+One usable case, bench-220, was re-run from scratch in a fresh clone and gave the same three verdicts. A first attempt failed only because forge-std was missing there; it is not counted. Raw logs are under `calibration/wave2/runs/`, parsed by scripts whose tests damage real logs and check that the answer changes.
+
 ## What the numbers can and cannot say
 
 They can say: the release reproduces the paper's patch arithmetic and subset construction, and on the paper's own scores patching is the lowest task in 9 of 10 configurations.
@@ -102,7 +120,7 @@ They cannot say how much harder patching is, whether exploitation is harder than
 
 ## Still not done
 
-No model was run, and no hand-written reference fix was tried, so false rejections of correct patches are shown, not counted. Ethereum only: I found no free archive endpoint for BSC. The verified sources came from Sourcify, because no Etherscan key turned up on any of our machines. The remaining 52 Ethereum cases and a reference-fix arm are the next step, still with zero model spend. A paid model run only makes sense after that; the paper's Table 5 puts patching at $0.06 to $21.86 per case, about $217 for the headline configuration on 94 cases.
+No model was run, and the hand-written reference fixes cover three cases only, so false rejections of correct patches are shown, not counted. Ethereum only: I found no free archive endpoint for BSC. The verified sources came from Sourcify, because no Etherscan key turned up on any of our machines. The 24 excluded Ethereum cases (fixing the recompile of the staged sources, the `MemoryOOG` baseline, an Etherscan-sourced run) and more reference fixes are the next step, still with zero model spend. A paid model run only makes sense after that; the paper's Table 5 puts patching at $0.06 to $21.86 per case, about $217 for the headline configuration on 94 cases.
 
 Boundaries: defensive measurement on historical, publicly disclosed incidents from the DeFiHackLabs corpus only. No mainnet, no wallets, no hunting for new vulnerabilities.
 

@@ -1,0 +1,94 @@
+== bench-02
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x66e7d7839333f502df355f5bd87aea24bac2ee63", "files": 20, "meta": {"contract_name": "Monoswap", "compiler_version": "0.7.6+commit.7338295f", "optimization_used": true, "optimization_runs": 20, "runtimeMatch": "exact_matc
+== bench-103
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xac3418ce48dbd35fe213dcfdfb70f044a47f9b0f", "files": 21, "meta": {"contract_name": "AToken", "compiler_version": "0.8.10+commit.fc410830", "optimization_used": true, "optimization_runs": 25000, "runtimeMatch": "exact_ma
+== bench-112
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x9dcb6bc351ab416f35aeab1351776e2ad295abc4", "files": 1, "meta": {"contract_name": "OErc20Delegate", "compiler_version": "0.5.17+commit.d19bba13", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "mat
+== bench-117
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x4d5b4b9ccf52bbcfe7b71b3038d8577293779e0c", "files": 32, "meta": {"contract_name": "AstridProtocol", "compiler_version": "0.8.18+commit.87f61d96", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "ex
+== bench-121
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x1c2220437b068a8c124ac1d158f7f786fbea701e", "files": 30, "meta": {"contract_name": "HToken", "compiler_version": "0.8.17+commit.8df45f5f", "optimization_used": true, "optimization_runs": 100000, "runtimeMatch": "exact_m
+== bench-136
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x6128d5f7c64dab48a1c66f9d62eaefa1d5aa03ed", "files": 12, "meta": {"contract_name": "OxODexPool", "compiler_version": "0.8.18+commit.87f61d96", "optimization_used": true, "optimization_runs": 1000, "runtimeMatch": "match
+== bench-148
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xdb0618e0b850cab3f756d030398be22929226d5c", "files": 8, "meta": {"contract_name": "PresaleV4", "compiler_version": "0.8.9+commit.e5eed63a", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "exact_mat
+== bench-151
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x863e572b215fd67c855d973f870266cf827aea5e", "files": 16, "meta": {"contract_name": "EFVault", "compiler_version": "0.8.3+commit.8d00100c", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "exact_matc
+== bench-157
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x6326debbaa15bcfe603d831e7d75f4fc10d9b43e", "files": 1, "meta": {"contract_name": "Vyper_contract", "compiler_version": "0.2.15+commit.6e7dba7", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "matc
+== bench-162
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xec260f5a7a729bb3d0c42d292de159b4cb1844a3", "files": 62, "meta": {"contract_name": "RariFundManager", "compiler_version": "0.5.17+commit.d19bba13", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "e
+== bench-181
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xdb3401bef8f66e7f6cd95984026c26a4f47eee84", "files": 5, "meta": {"contract_name": "CErc20Delegate", "compiler_version": "0.5.16+commit.9c3226ce", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "exa
+== bench-198
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x46bea99d977f269399fb3a4637077bb35f075516", "files": 31, "meta": {"contract_name": "LendingPool", "compiler_version": "0.8.10+commit.fc410830", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "match
+== bench-21
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xb276647e70cb3b81a1ca302cf8de280ff0ce5799", "files": 16, "meta": {"contract_name": "XStable2", "compiler_version": "0.6.12+commit.27d51765", "optimization_used": true, "optimization_runs": 2000, "runtimeMatch": "exact_m
+== bench-220
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x2bbd66fc4898242bdbd2583bbe1d76e8b8f71445", "files": 1, "meta": {"contract_name": "DVM", "compiler_version": "0.6.9+commit.3e3065ac", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "match"}}
+== bench-23
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x3c710b981f5ef28da1807ce7ed3f2a28580e0754", "files": 15, "meta": {"contract_name": "CCollateralCapErc20Delegate", "compiler_version": "0.5.17+commit.d19bba13", "optimization_used": true, "optimization_runs": 200, "runti
+== bench-237
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xd9ffe514e96014fa79bc0c33874dd2ef20678f6f", "files": 89, "meta": {"contract_name": "PoolCore", "compiler_version": "0.8.10+commit.fc410830", "optimization_used": true, "optimization_runs": 1000, "runtimeMatch": "match"}
+== bench-239
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xbb0d4bb654a21054af95456a3b29c63e8d1f4c0a", "files": 13, "meta": {"contract_name": "EToken", "compiler_version": "0.8.10+commit.fc410830", "optimization_used": true, "optimization_runs": 1000000, "runtimeMatch": "exact_
+== bench-252
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x98a877bb507f19eb43130b688f522a13885cf604", "files": 27, "meta": {"contract_name": "ExchangeWithAtomic", "compiler_version": "0.7.4+commit.3f05b770", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": 
+== bench-257
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x6186e99d9cfb05e1fdf1b442178806e81da21dd8", "files": 74, "meta": {"contract_name": "CurveProxyLogic", "compiler_version": "0.6.7+commit.b8d736ae", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "ma
+== bench-266
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x9b3be0cc5dd26fd0254088d03d8206792715588b", "files": 1, "meta": {"contract_name": "Vault", "compiler_version": "0.5.16+commit.9c3226ce", "optimization_used": true, "optimization_runs": 150, "runtimeMatch": "match"}}
+== bench-27
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xb92336759618f55bd0f8313bd843604592e27bd8", "files": 14, "meta": {"contract_name": "Replica", "compiler_version": "0.7.6+commit.7338295f", "optimization_used": true, "optimization_runs": 999999, "runtimeMatch": "match"}
+== bench-31
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x50c7a557d408a5f5a7fdbe1091831728ae7eba45", "files": 46, "meta": {"contract_name": "Pool", "compiler_version": "0.8.10+commit.fc410830", "optimization_used": true, "optimization_runs": 100000, "runtimeMatch": "match"}}
+== bench-336
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x3c0ada81038a078cc1272ac22745ddd1ab8839af", "files": 113, "meta": {"contract_name": "ValidationLogic", "compiler_version": "0.6.12+commit.27d51765", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "
+== bench-34
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x34ca24ddcdaf00105a3bf10ba5aae67953178b85", "files": 13, "meta": {"contract_name": "P2Controller", "compiler_version": "0.8.2+commit.661d1103", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "exact
+== bench-36
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xeac2a259f3ebb8fd1097aeccaa62e73b6e43d5bf", "files": 19, "meta": {"contract_name": "SchnoodleV9", "compiler_version": "0.8.15+commit.e14f2714", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "match
+== bench-416
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xc4113ae18e0d3213c6a06947a2ffc70ad3517c77", "files": 14, "meta": {"contract_name": "CauldronV4", "compiler_version": "0.8.16+commit.07a7930e", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "exact_
+== bench-423
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xcc5fda5e3ca925bd0bb428c8b2669496ee43067e", "files": 70, "meta": {"contract_name": "WrappedTokenSwapperImpl", "compiler_version": "0.8.7+commit.e28d00a7", "optimization_used": true, "optimization_runs": 1000000, "runtim
+== bench-428
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xc3430bc8c2c05fc6b42114bf7f82a3e2f3ee9454", "files": 1, "meta": {"contract_name": "EthVaultImpl", "compiler_version": "0.5.0+commit.1d4f565a", "optimization_used": true, "optimization_runs": 1, "runtimeMatch": "match"}}
+== bench-433
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x5e70f7acb8ec0231c00220d11c74dc2b23187103", "files": 13, "meta": {"contract_name": "PrivilegedCheckpointCauldronV4", "compiler_version": "0.8.20+commit.a1b79de6", "optimization_used": true, "optimization_runs": 400, "ru
+== bench-434
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x5e70f7acb8ec0231c00220d11c74dc2b23187103", "files": 13, "meta": {"contract_name": "PrivilegedCheckpointCauldronV4", "compiler_version": "0.8.20+commit.a1b79de6", "optimization_used": true, "optimization_runs": 400, "ru
+== bench-44
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xd77e28a1b9a9cfe1fc2eee70e391c05d25853cbf", "files": 15, "meta": {"contract_name": "CEtherDelegate", "compiler_version": "0.5.17+commit.d19bba13", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "ma
+== bench-465
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x3747484567119592ff6841df399cf679955a111a", "files": 25, "meta": {"contract_name": "Staking", "compiler_version": "0.8.4+commit.c7e474f2", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "exact_matc
+== bench-48
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xf480ee81a54e21be47aa02d0f9e29985bc7667c4", "files": 18, "meta": {"contract_name": "GovernanceFacet", "compiler_version": "0.7.6+commit.7338295f", "optimization_used": true, "optimization_runs": 1000, "runtimeMatch": "e
+== bench-483
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x80f18b12a6dbd515c5ad01a2006abf30c5972158", "files": 23, "meta": {"contract_name": "VaultExternal", "compiler_version": "0.8.28+commit.7893614a", "optimization_used": true, "optimization_runs": 20000, "runtimeMatch": "e
+== bench-515
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x539d54074e052ae82de4936ae6bb213ab773559e", "files": 9, "meta": {"contract_name": "PumpToken", "compiler_version": "0.8.27+commit.40a35a09", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "match"}}
+== bench-518
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x85a948fd70b2b415bda93324581fb5fff1293df7", "files": 1, "meta": {"contract_name": "AlkemiEarnPublic", "compiler_version": "0.4.24+commit.e67f0147", "optimization_used": true, "optimization_runs": 1, "runtimeMatch": "mat
+== bench-524
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xe10572ea8e9ed9cc7f9a528da3856a5caa26c7bf", "files": 63, "meta": {"contract_name": "Machine", "compiler_version": "0.8.28+commit.7893614a", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "match"}}
+== bench-53
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x8407dc57739bcda7aa53ca6f12f82f9d51c2f21e", "files": 1, "meta": {"contract_name": "MainchainGatewayManager", "compiler_version": "0.5.17+commit.d19bba13", "optimization_used": true, "optimization_runs": 200, "runtimeMat
+== bench-534
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x5fca000f8a1ef45fe2412a8e305ff36d8757be0f", "files": 9, "meta": {"contract_name": "ProportionalLiquidity", "compiler_version": "0.8.13+commit.abaa5c0e", "optimization_used": true, "optimization_runs": 200, "runtimeMatch
+== bench-562
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x0e511aa1a137aad267dfe3a6bfca0b856c1a3682", "files": 6, "meta": {"contract_name": "BPool", "compiler_version": "0.5.12+commit.7709ece9", "optimization_used": true, "optimization_runs": 2000, "runtimeMatch": "match"}}
+== bench-565
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xdd1778f71a4a1c6a0efebd8ae9f8848634ce1101", "files": 9, "meta": {"contract_name": "MorphoChainlinkOracleV2", "compiler_version": "0.8.21+commit.d9974bed", "optimization_used": true, "optimization_runs": 999999, "runtime
+== bench-567
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xd1456d1b9ceb59abd4423a49d40942a9485ceef6", "files": 1, "meta": {"contract_name": "SASHA", "compiler_version": "0.8.25+commit.b61c2a91", "optimization_used": false, "optimization_runs": 200, "runtimeMatch": "match"}}
+== bench-57
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x73a499e043b03fc047189ab1ba72eb595ff1fc8e", "files": 44, "meta": {"contract_name": "CBridgeFacet", "compiler_version": "0.8.7+commit.e28d00a7", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "exact
+== bench-72
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x4a37a8d7cdb43d89b4dbd7ecfaeaf9bd39e24929", "files": 44, "meta": {"contract_name": "GoodFundManager", "compiler_version": "0.8.16+commit.07a7930e", "optimization_used": true, "optimization_runs": 0, "runtimeMatch": "mat
+== bench-77
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x15759ab2fa2195135bd9d9bfd85e39a8f8f8423c", "files": 44, "meta": {"contract_name": "GoodCompoundStakingV2", "compiler_version": "0.8.8+commit.dddeac2f", "optimization_used": true, "optimization_runs": 0, "runtimeMatch":
+== bench-80
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0x303a41300baeb37a1028af017b17b8a6edc3066a", "files": 38, "meta": {"contract_name": "TokenERC20", "compiler_version": "0.8.12+commit.f00d7308", "optimization_used": true, "optimization_runs": 490, "runtimeMatch": "exact_
+== bench-84
+{"dir": "upstream/data/sources/DeFiHackLabs/verified_source_by_address/ethereum/0xec2c74c9e2457d328bc6216858280ea13e740e8a", "files": 1, "meta": {"contract_name": "TokenMapped", "compiler_version": "0.6.12+commit.27d51765", "optimization_used": true, "optimization_runs": 200, "runtimeMatch": "match"
