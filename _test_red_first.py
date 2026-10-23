@@ -63,7 +63,8 @@ def main() -> int:
 
     failures = []
 
-    def check(label: str, target: str, mutate_cases=None, mutate_data=None) -> None:
+    def check(label: str, target: str, mutate_cases=None, mutate_data=None,
+              expect: str = "DISCREPANCY") -> None:
         with tempfile.TemporaryDirectory() as td:
             td = pathlib.Path(td)
             up = td / "up"
@@ -75,8 +76,9 @@ def main() -> int:
             if mutate_data:
                 mutate_data(dd)
             got = run(up, dd).get(target)
-            ok = got == "DISCREPANCY"
-            print(f"  {'RED ok      ' if ok else 'STAYED GREEN'}  {label} -> {target!r}: {got}")
+            ok = got == expect
+            tag = ("RED ok      " if expect == "DISCREPANCY" else "FLIPS GREEN ") if ok else "DID NOT FLIP"
+            print(f"  {tag}  {label} -> {target!r}: {got}")
             if not ok:
                 failures.append((label, target, got))
 
@@ -110,12 +112,29 @@ def main() -> int:
         with p.open("w", newline="", encoding="utf-8") as f:
             csv.writer(f).writerows(rows)
 
+    def make_monotonic(dd: pathlib.Path):
+        # sort each task's Easy/Med/Hard cells descending, so every row is monotonic
+        p = dd / "paper-table-4.csv"
+        rows = list(csv.reader(p.open(encoding="utf-8")))
+        for r in rows[2:]:
+            for t in range(3):
+                cells = sorted((float(x) for x in r[2 + 4 * t:5 + 4 * t]), reverse=True)
+                r[2 + 4 * t:5 + 4 * t] = [f"{x:.1f}" for x in cells]
+        with p.open("w", newline="", encoding="utf-8") as f:
+            csv.writer(f).writerows(rows)
+
     print("\nmutations:")
     check("delete one case file", "dataset size", mutate_cases=drop_one)
     check("flip one `fixable` to False", "patch subset size", mutate_cases=unfix)
     check("re-date one 2024 incident to 2025", "temporal split", mutate_cases=redate)
     check("bend one Table 4 patch cell off the k/n grid",
           "Table 4 patch cells are whole-case counts", mutate_data=bend_table4)
+    # the reverse direction: a check that is red on the real data must go green
+    # when the data is made to satisfy the paper's sentence
+    mono = "'All models show monotonic degradation' vs Table 4"
+    if baseline.get(mono) != "DISCREPANCY":
+        failures.append(("monotonicity baseline", "should be DISCREPANCY on real data", baseline.get(mono)))
+    check("make every Table 4 row monotonic", mono, mutate_data=make_monotonic, expect="PASS")
 
     print()
     if failures:

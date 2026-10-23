@@ -14,6 +14,7 @@ We set out to show that number was wrong. It is not wrong arithmetically. What w
 instead is narrower and, we think, more useful: what the release lets anyone check, what it
 does not, where the paper contradicts itself, and what the patch oracle actually tests.
 
+**Technical comment (arXiv-ready, 5 pages):** [paper/comment.pdf](paper/comment.pdf) · source [paper/comment.tex](paper/comment.tex) · submission notes [paper/ARXIV.md](paper/ARXIV.md)
 **Read the article:** [docs/article-en.md](docs/article-en.md) · [docs/article-ru.md](docs/article-ru.md)
 **Every finding with its verification record:** [FINDINGS.md](FINDINGS.md)
 **What changed since v1 of this audit, including our own errors:** [CHANGELOG.md](CHANGELOG.md)
@@ -78,7 +79,7 @@ The counts and the patch arithmetic check out.
 
 ## What the patch oracle actually tests
 
-Read from the code at `1cb7410`. The points marked in [calibration/RESULTS.md](calibration/RESULTS.md) were then measured on forks.
+Read from the code at `1cb7410`. The points marked in [calibration/results.md](calibration/results.md) were then measured on forks.
 
 - **"Normal operation preserved" is byte equality.** For each replayed historical call,
   `src/infra/cli/validate_patch.py:1330-1332` asserts the same success flag, the same return
@@ -166,7 +167,7 @@ The oracle was run without any model on 8 Ethereum patch cases with three fixed 
 that can discriminate at all, a patch that fixes nothing scored 1.0 once per input (bench-391: `revert()`
 and an emit-only patch that leaves the attacker's profit untouched; bench-76: the unchanged source). The
 other 5 cases could not score any patch in this setup. One run's score was flipped by an RPC error. Details,
-logs and caveats: [calibration/RESULTS.md](calibration/RESULTS.md). Reproduce with `calibration/run_all.sh`.
+logs and caveats: [calibration/results.md](calibration/results.md). Reproduce with `calibration/run_all.sh`.
 
 ## The next measurement
 
@@ -186,7 +187,7 @@ case, about $217 for Codex × GPT-5.5 on 94 cases.
 | `panel/` | the two adversarial prompts and both model responses from 2026-10-07 |
 | `FINDINGS.md` | every finding of the second review, with both refuters' verdicts |
 | `docs/` | the article, English and Russian |
-| `calibration/` | the oracle calibration: scripts, raw forge logs, [RESULTS.md](calibration/RESULTS.md) |
+| `calibration/` | the oracle calibration: scripts, raw forge logs, [results.md](calibration/results.md) |
 
 The arXiv HTML itself is not redistributed; `make tables` fetches it and checks the hash.
 

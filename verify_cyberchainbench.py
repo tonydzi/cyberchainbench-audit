@@ -236,6 +236,19 @@ def main() -> int:
           f"We call this an inconsistency, not a known typo: the GPT-5.2 pair also fits k/57, "
           f"so a different denominator is as plausible as a transcription error.")
 
+    # 4b. "All models show monotonic degradation from easy to hard" ---------
+    # Section 4.2 states it; Table 4 is the evidence it points at.
+    nonmono = []
+    for cfg, v in t4.items():
+        for task in ("detect", "exploit", "patch"):
+            _, e, m, h = v[task]
+            if not (e >= m >= h):
+                nonmono.append(f"{cfg} {task} {e}/{m}/{h}")
+    r.add(FAIL if nonmono else PASS, "'All models show monotonic degradation' vs Table 4",
+          f"section 4.2 says all models degrade monotonically from easy to hard. In Table 4, "
+          f"{len(nonmono)} of {3 * len(t4)} task rows are not monotonic (easy >= medium >= hard), "
+          f"including the headline configuration: " + "; ".join(nonmono))
+
     # 5. three different 'best patch' statements ----------------------------
     best_cfg, best = max(((c, v["patch"][0]) for c, v in t4.items()), key=lambda t: t[1])
     claims = {PAPER["best_patch_text"], PAPER["best_patch_abstract"], best}
