@@ -1,5 +1,60 @@
 # cyberchainbench-audit
 
+An independent check of a published AI benchmark (CyberChainBench), using only the benchmark's own public files.
+
+**Who it's for:** researchers and readers who want to know which numbers in the CyberChainBench paper they can actually verify.
+**What you get:** a script that re-derives the paper's counts and patch arithmetic, plus a list of what does not reproduce (for example the 43.7% exploit score cannot be checked from the release). No API keys, no models, no spend.
+
+## Quick start
+1. Install Python 3 and git.
+2. Clone this repo and run `make`. It downloads the benchmark, pins it to commit `1cb7410` and runs the audit.
+3. Run `make red`. It corrupts the data on purpose and shows the checks go red.
+
+**Done when:** the audit ends with `reproduced: 5   discrepancies: 5   notes: 6` and `make red` ends with `every mutation went red`.
+
+> Want an AI agent to do it for you? Paste this to Claude Code / Codex / Cursor:
+> "Read the 'For AI agents' section of https://github.com/tonydzi/cyberchainbench-audit and set it up for me."
+
+## For AI agents
+
+### Preconditions
+- Python 3 (checked with 3.12) and git. Standard library only. `make` is optional; on Windows without `make` use the manual commands below.
+- Network access to github.com to fetch the upstream benchmark. No accounts, keys, RPC or models.
+- Ask the human: nothing required. Ask before running `make tables` (it downloads the arXiv page).
+
+### Reproduce
+```
+git clone https://github.com/tonydzi/cyberchainbench-audit
+cd cyberchainbench-audit
+make
+make red
+```
+Without `make`:
+```
+git clone https://github.com/defai-labs/CyberChainBench.git
+git -C CyberChainBench checkout 1cb7410
+python3 verify_cyberchainbench.py --upstream CyberChainBench
+python3 _test_red_first.py --upstream CyberChainBench
+```
+The upstream clone `CyberChainBench/` is git-ignored.
+
+### Configure
+Nothing to configure. The pinned upstream commit is `1cb7410` (tag `v1.0`), set in the `Makefile`. Do not change it, or the numbers in `FINDINGS.md` stop applying.
+
+### Verify
+Run the audit and the red-first test (commands above). Expected, real run 2026-11-13: `verify_cyberchainbench.py` exits 0 and prints `reproduced: 5   discrepancies: 5   notes: 6`; `_test_red_first.py` exits 0 and prints `every mutation went red: the PASS checks are load-bearing.` To check a single number, find it in `FINDINGS.md`, which lists each finding with its verification record.
+
+### Uninstall / rollback
+Delete the cloned folder. `make clean` removes only the upstream clone, never `data/` or `panel/`.
+
+### Rules for the agent
+- Do not alter files in `data/` or `calibration/` to make a check pass. A check that cannot go red measures nothing.
+- Do not state a number as verified unless `FINDINGS.md` or the script output supports it.
+- `make tables` downloads the arXiv HTML and compares its hash; run it only if the human asks.
+- Calibration scripts under `calibration/` run containers (`run_all.sh`, forge). Do not run them without the human's yes.
+
+## Details
+
 An independent audit of **CyberChainBench**
 ([arXiv:2606.26216v1](https://arxiv.org/abs/2606.26216), Huang, Jiang, Poovendran, Lin, 24 Jun 2026)
 against the benchmark's own public release,
