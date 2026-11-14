@@ -10,7 +10,7 @@ An independent check of a published AI benchmark (CyberChainBench), using only t
 2. Clone this repo and run `make`. It downloads the benchmark, pins it to commit `1cb7410` and runs the audit.
 3. Run `make red`. It corrupts the data on purpose and shows the checks go red.
 
-**Done when:** the audit ends with `reproduced: 5   discrepancies: 5   notes: 6` and `make red` ends with `every mutation went red`.
+**Done when:** the audit ends with `reproduced: 5   discrepancies: 5   notes: 6` and `make red` ends with `every mutation went red`. The word "discrepancies: 5" is the result, not an error: it counts claims in the paper that do not match the released files, and the script still exits 0. If `make` is not installed (common on Windows), use the manual commands in the agent section, with `python` in place of `python3` if needed.
 
 > Want an AI agent to do it for you? Paste this to Claude Code / Codex / Cursor:
 > "Read the 'For AI agents' section of https://github.com/tonydzi/cyberchainbench-audit and set it up for me."
@@ -20,7 +20,7 @@ An independent check of a published AI benchmark (CyberChainBench), using only t
 ### Preconditions
 - Python 3 (checked with 3.12) and git. Standard library only. `make` is optional; on Windows without `make` use the manual commands below.
 - Network access to github.com to fetch the upstream benchmark. No accounts, keys, RPC or models.
-- Ask the human: nothing required. Ask before running `make tables` (it downloads the arXiv page).
+- Ask the human: nothing required. Ask before running `make tables` (it downloads the arXiv page, and its recipe uses `curl`, `shasum` and `/tmp`, so it is macOS/Linux only).
 
 ### Reproduce
 ```
