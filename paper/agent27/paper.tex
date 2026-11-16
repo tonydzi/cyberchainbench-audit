@@ -1,0 +1,305 @@
+\documentclass[conference]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{url}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\ccb}{CyberChainBench}
+\newcommand{\para}[1]{\textit{#1.}\ }
+
+\begin{document}
+\sloppy
+
+\title{A Model-Free Audit of CyberChainBench's Headline Scores and Released Patch Validator}
+
+\author{\IEEEauthorblockN{Anton Dziatkovskii}
+\IEEEauthorblockA{Palo Alto AI Research Lab\\
+Palo Alto, CA, USA\\
+ORCID 0000-0001-7408-3054\\
+\url{https://github.com/tonydzi}}}
+
+\maketitle
+
+\begin{abstract}
+CyberChainBench reports that the best LLM-agent configuration scores 37.5\% on detection, 43.7\% on exploitation and 23.4\% on patching of real DeFi incidents, and reads this as a difficulty gradient. We audit the paper (v1) and its public release (commit \code{1cb7410}) without model inference. Scope: we ran the released patch-validation command-line tool on forks of historical Ethereum state, not the benchmark's full scoring path, so we do not re-score 23.4\%. The central result is a controlled pair. On three cases, the unchanged verified source, recompiled by the tool, replays the attack with its full profit and scores 0.0, while the same source with one added event replays the attack with the identical logged profit and scores 1.0. The released blocking predicate accepts any change in the attack call's status, return data or logs; on the 19 cases with a valid event-only control it reported the attack as blocked in all 19, with logged profit unchanged in 10. Under an author-defined profit-threshold sensitivity rule derived from the paper's ``$<$1\% of original profit'' clause, event-only full credit falls from 4 of 19 to 0. Of 55 Ethereum cases, 26 were usable; unchanged-source scores are confounded by recompilation and are not read as false accepts. Separately, a scripted document audit finds that the three headline numbers are differently defined scores on three non-identical case sets, that the 200-case exploitation set is not identifiable from the release, and that the text disagrees with its own tables in enumerated places. We recommend controls, requiring no model inference, that would better support the replay-based patch score.
+\end{abstract}
+
+\begin{IEEEkeywords}
+LLM agents, benchmark validity, test oracle, automated program repair, smart contracts, reproducibility
+\end{IEEEkeywords}
+
+\section{Introduction}
+Execution-based benchmarks are attractive for agentic software engineering because the verdict comes from running code rather than from a rubric or a judge model. The verdict is still produced by a validator, and a validator is a program with its own acceptance region.
+
+\ccb{}~\cite{ccb} evaluates LLM agents on 541 historical DeFi incidents drawn from DeFiHackLabs~\cite{dfhl} with three tasks: detect the vulnerability, write an exploit, and write a patch. Its abstract states that ``Results reveal a clear difficulty gradient: the best configuration scores 37.5\% on detection, 43.7\% on exploitation, but only 23.4\% on patching'', and its main-result discussion (Sec.~4.2) concludes that ``producing a correct fix is far harder than identifying or reproducing a vulnerability'', there comparing 23.4\% with a fourth metric, the 56.4\% type-classification accuracy. Two readings are implied: that the three numbers lie on one scale, and that the patch score measures patch correctness. We ask two questions of the paper and its release: what does the released patch validator accept (Sections~\ref{sec:oracle}--\ref{sec:calib}), and does the headline comparison support a difficulty ordering (Section~\ref{sec:doc})? We do not claim that 37.5, 43.7 or 23.4 are wrong.
+
+\para{Study boundary} The object is arXiv:2606.26216v1 and the repository \code{defai-labs/CyberChainBench} at commit \code{1cb7410} (tag \code{v1.0}). No model was run and no agent output is available in the release, so no model score is re-measured. For the validator we ran only the released \code{validate\_patch} command-line tool; the benchmark's runner and its Harbor-based verifier were not run and equivalence of the paths is not shown. The one link we establish by code reading is that the recompile function is reached from \code{evaluate\_patch}, which both the command-line tool and the evaluation runner import (Section~\ref{sec:oracle}); the Harbor verifier was not traced. Every validator result below is therefore a property of the released tool on our setup. None is a correction factor for a published score.
+
+\para{Prior work and what is new here} That a patch can satisfy validating tests without being correct is established in automated program repair: Qi et al.~\cite{qi2015} found most patches of generate-and-validate systems plausible but incorrect, and Smith et al.~\cite{smith2015} characterised overfitting to the test suite. For LLM agents, PatchBench~\cite{patchbench} reports that validating vulnerability patches with the proof-of-concept exploit alone inflates solve rates by a factor of 1.83, and RoboBugBench~\cite{robobugbench} reports that a shipped validation rule accepted 11 of 11 counterfeit patches. On this release, shane-moore reported replay-accounting and build problems before us in issue~\#8 and pull requests~\#1--\#7 of October 2026~\cite{moore}, including the out-of-gas rule, null-proxy normalisation, prompt and scorer alignment, and an unchanged-source run that scored 1.0. We claim none of these. Ours are:
+\begin{enumerate}
+\item \textbf{a controlled pair} (Section~\ref{sec:pair}) in which the unchanged source scores 0.0 and the same source plus one emitted event scores 1.0 with identical logged attacker profit, on three cases;
+\item \textbf{calibration counts} for mechanically constructed no-op and degenerate controls on 55 Ethereum cases, rescored under a profit-threshold sensitivity rule, with the unusable cases classified;
+\item \textbf{the shared recompile path} and a second measured contract with its bytecode and settings mismatch (bench-76);
+\item \textbf{a scripted document-level audit} of 16 checks of the paper against its release.
+\end{enumerate}
+
+\section{The Patch Validator: Described and Implemented}
+\label{sec:oracle}
+\para{As described} The paper says the validator ``compiles the patch and injects it via \code{vm.etch}'', ``replays the original attack transaction, it must revert or produce $<$1\% of original profit'', and ``replays historical legitimate transactions that call the same entry point, all must succeed with unchanged behavior''. The reward is $R=\mathbf{1}[\text{exploit blocked}]\cdot\mathbf{1}[\text{normal txs pass}]$. The blocking condition is stated four times as a revert (Sec.~3.1 Design Principles, validator paragraph, reward definition, agent prompt); only the validator paragraph adds the profit alternative. The tool description and the reward definition say the patch is ``deployed via proxy upgrade''.
+
+\para{As implemented} The following is a code reading at \code{1cb7410}; each cited line was re-read by hand, and file and line references resolve under \url{https://github.com/defai-labs/CyberChainBench/blob/1cb7410395bb98f2a941d7fdab4882963ef68214/}.
+
+\emph{Blocking is any observable change.} In \path{src/eval/tasks/patch/attack_replay.py}, line~227, the attack replay counts as blocked if the call fails, or its return data changes, or its log hash changes. The profit test runs only when none of those changed (line~229).
+
+\emph{Preservation is byte equality on the replayed calls.} At most \code{limit} historical calls are replayed (default 10 from the scoring path, 3 from the command line); our runs replayed one to five. In \path{src/infra/cli/validate_patch.py}, lines 1330--1332, a legitimate call is preserved if the success flag, the return-data hash and the hash of the full log stream are identical. By construction, a patch that changes an amount or an event on a replayed entry point fails this predicate, whether or not it is correct. This is an implication of the predicate, not a measured false rejection.
+
+\emph{Out-of-gas counts as preserved.} A legitimate-call replay whose forge output contains \code{MemoryOOG} or \code{OutOfGas} is marked preserved (lines 1608--1612), and the reported number of checked calls is the number of result rows (line~1638).
+
+\emph{Two etch targets.} The patch is etched at the case's proxy address for the attack replay when one is set (\code{attack\_replay.py}, line~260) and at the case's \code{vulnerable\_address} for the legitimate calls (\code{validate\_patch.py}, line~1577). No proxy upgrade is performed.
+
+\emph{Compiler settings are not the deployed ones.} On the verified-source path, the primary \code{solcx} branch of \code{compile\_dfhl\_fixed\_bytecode} hard-codes \code{optimizer: enabled, runs: 200} and passes no EVM version (\path{src/infra/solidity/legacy.py}, line~226). If \code{solcx} fails, a forge-build fallback (around lines 265--281) builds with Foundry defaults. Neither reads the deployed settings, and our tables do not record which branch each case took. The function is reached from \code{evaluate\_patch} (\path{src/eval/tasks/patch/evaluator.py}, line~741), which both the command-line tool (\path{src/infra/cli/validate_patch.py}, line~14) and the evaluation runner (\path{src/eval/runner.py}, line~74) import.
+
+We found no systematic calibration of the validator against no-op patches or reference patches in the paper or in the release, beyond the single unchanged-source run reported in issue~\#8~\cite{moore}; Section~\ref{sec:calib} reports one.
+
+\section{Model-Free Calibration}
+\label{sec:calib}
+\subsection{Setup}
+We ran the released \code{validate\_patch} tool at \code{1cb7410} without code changes on forks of historical Ethereum state. The patch subset has 55 Ethereum cases; wave~1 covered 8 and wave~2 the other 47. The forks used a free public archive RPC endpoint, forge~1.8.5 from the official container image, and verified sources staged from Sourcify, because no Etherscan key was available. No transaction was sent to a live network; only historical, publicly disclosed incidents are involved. ``Score'' always means the \code{score} field of this tool.
+
+For each case we attempted to construct three controls mechanically from the verified source of the function that the case file labels as vulnerable:
+\begin{itemize}
+\item \textbf{unchanged} (intended no-op): the verified source, byte for byte;
+\item \textbf{revert} (degenerate): \code{revert();} becomes the first statement of the labelled function;
+\item \textbf{emit-only} (intended no-op): an event is declared and emitted as the first statement; the original statements are left intact.
+\end{itemize}
+These are mechanically constructed controls, not independently established semantic negatives: recompilation can change the hosted program, an added event changes code and gas, and a blanket revert could be acceptable for a function that should never be callable. The claims below are stated so as not to depend on a universal ``not a fix'' label.
+
+Every count is parsed from the raw forge output by a script that raises on a log without a verdict marker, and is cross-checked against the tool's own JSON verdict; the two agree in all runs of wave~2. Four of the 55 cases have a null proxy address, which crashes the attack replay (a string conversion turns JSON \code{null} into \code{"None"}); these four (bench-559, 562, 565, 567) were run with the null key removed from a copy of the case file (\code{run\_wave2.sh}). This is the only input other than the patch that we altered.
+
+A case is \emph{usable} if the unchanged and revert controls compile and show no RPC error line, the historical attack reproduces before the patch, and the revert control is reported as blocking it. Of the 55 cases, 26 are usable (Section~\ref{sec:excl} classifies the rest). In 7 of them the labelled function is \code{view} or \code{pure}, where an event cannot be emitted, so the emit-only control is valid in 19.
+
+\subsection{Central result: a controlled pair}
+\label{sec:pair}
+Table~\ref{tab:pair} compares two submissions per case that pass through the same recompile-and-etch pipeline and differ only by one event declaration and one \code{emit} statement.
+
+\begin{table}[t]
+\caption{Controlled pair: unchanged source against the same source plus one emitted event. In each case the attacker profit logged before the patch, after the unchanged recompile and after the emit-only patch is the same integer (token base units, as logged). ``Calls pres.'' refers to the emit-only run.}
+\label{tab:pair}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llccc@{}}
+\toprule
+ & Attacker profit, identical in the & Calls & \multicolumn{2}{c}{Score} \\
+\cmidrule(l){4-5}
+Case & three logs & pres. & unch. & emit \\
+\midrule
+bench-220 & {\scriptsize 268446856349364000973895} & 5/5 & 0.0 & 1.0 \\
+bench-391 & {\scriptsize 1000002000184117537141827849574566118} & 1/1 & 0.0 & 1.0 \\
+bench-515 & {\scriptsize 12322108091163959727145349} & 4/4 & 0.0 & 1.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In all three cases the unchanged recompiled source replays the attack with the full logged profit, is reported as not blocked, and scores 0.0. The emit-only submission replays the attack with the identical profit integer, is reported as blocked, preserves every replayed legitimate call (``Calls pres.''), and scores 1.0. Within each pair the compiler settings, the etch target and the fork are held constant; the only source difference is the event and its \code{emit} statement, which also changes the compiled bytecode and gas use. The contrast arises at the blocking check. The tool does not log which disjunct fired: the replay test prints only the before and after profit and a \code{BLOCKED} marker (\code{attack\_replay.py}, lines 220--232). Because the logged profit is unchanged and the event is the only source edit, a changed log hash (possibly with changed return data) is our inference, for all three cases.
+
+Four limits apply. First, ``profit'' is the quantity the tool logs; equality of other attacker gains is not established. Second, preservation of the replayed historical calls shows that those calls returned the same hashes, not that they never reach the modified function. Third, the call counts differ: for bench-220 and bench-515 the unchanged run replayed 3 and 2 legitimate calls (all preserved) against 5 and 4 for emit-only. The unchanged 0.0 is decided at the blocking gate, so the contrast is unaffected. Fourth, in bench-220 the \code{revert()} control also scores 1.0 with logged profit unchanged, and in bench-515 it scores 1.0 with logged profit halved (12322108091163959727145349 to 6162597909817710312352551). For these two cases it is therefore not established that the labelled function is the exploited path or that the logged profit captures the attack. The pair shows a property of the blocking predicate.
+
+\para{A fourth case, recompile-confounded} bench-239 also gives the emit-only submission 1.0, but its unchanged recompile already scores 1.0, and in both runs the logged profit falls from 1981315081640419711267499364 to 60000000000000000000000000, about 3\% of the original and above the 1\% threshold. We do not attribute this score to the event.
+
+\subsection{Aggregate counts under the released rule}
+Table~\ref{tab:results} (left half) gives the counts over both waves.
+
+\begin{table}[t]
+\caption{Controls on usable cases, both waves: released rule and the profit-threshold sensitivity rule, rescored from the same logs. Intervals are 95\% Wilson intervals in percent; they describe these runs under a binomial model and are not estimates of a population rate.}
+\label{tab:results}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}lrrcrrcr@{}}
+\toprule
+ & & \multicolumn{3}{c}{Released rule} & \multicolumn{3}{c}{Profit-threshold rule} \\
+\cmidrule(lr){3-5}\cmidrule(l){6-8}
+Control & $n$ & full & interval & blocked & full & interval & blocked \\
+\midrule
+unchanged & 26 & 4 & [6.1, 33.5] & 13 & 2 & [2.1, 24.1] & 7 \\
+revert    & 26 & 5 & [8.5, 37.9] & 26 & 2 & [2.1, 24.1] & 15 \\
+emit-only & 19 & 4 & [8.5, 43.3] & 19 & 0 & [0.0, 16.8] & 6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\para{Emit-only} The emit-only control is reported as blocking the attack in 19 of 19 cases. This is a property of the blocking predicate, which accepts any observable change, and not a count of 19 semantic false accepts. In wave~2 the logged attacker profit is the same integer before and after the patch in 8 of the 16 runs; across both waves it is 10 of 19. Full credit is given in 4 of 19: the three pairs of Table~\ref{tab:pair} and bench-239. In all 13 wave-2 emit-only runs that scored 0, the legitimate-call replay was not fully preserved; the raw forge logs give \code{logs changed} in 8 of them (bench-117, 23, 266, 428, 534, 567, 72, 84) and \code{success changed} in 5 (bench-27, 36, 44, 57, 80). The same added event thus suffices for the blocking gate and, in those eight runs, fails the preservation gate.
+
+\para{Revert} The revert control is reported as blocking in 26 of 26 by construction of the usability criterion and scores 1.0 in 5 of 26 (bench-220, 239, 34, 391, 515). In the one diagnosed example, bench-391, the single replayed legitimate call does not call the disabled function.
+
+\para{Unchanged} The unchanged source scores 1.0 in 4 of 26 cases (bench-76, 239, 534, 567; bench-567 is the case of issue~\#8~\cite{moore}) and is reported as blocking the attack in 13 of 26. Since the source is unchanged, these verdicts are not the effect of an edit.
+
+\subsection{Recompile-and-etch is not a null intervention}
+\label{sec:recompile}
+The tool does not etch the on-chain bytecode; it recompiles the submitted source and etches the result. For bench-76, the recompiled runtime is 8,490 bytes against 11,380 bytes on chain, and Sourcify records 999,999 optimizer runs and the \code{london} EVM version for the deployed contract, against the tool's fixed 200 runs and no EVM version. With the unchanged source, the logged attack profit on bench-76 falls to zero, the single replayed legitimate call is preserved, and the tool returns 1.0. The cause is not isolated: compiler settings, zeroed immutables, contract selection and the etch target are bundled in this intervention.
+
+The control that would separate ``the validator accepts a non-fix'' from ``the validator grades a different program'' is to etch the on-chain runtime bytecode and check that the attack still pays. \emph{We did not run that control.} We therefore do not interpret unchanged-source scores as false accepts. The narrower observation is that, on this path, the program hosted after recompiling and etching the unchanged verified source behaved differently from the original replay in the attack call in 13 of 26 usable cases, and that a submission identical to the verified source received full credit in 4.
+
+\subsection{Profit-threshold sensitivity rule}
+We rescored every usable run from the existing logs, without re-running forks, under an author-defined rule derived from the paper's ``$<$1\% of original profit'' clause:
+\begin{align*}
+\text{blocked}' &= (p_{\text{before}}>0)\ \wedge\ (100\,p_{\text{after}}<p_{\text{before}}),\\
+\text{preserved}' &= \text{preserved}\ \wedge\ \neg\,\text{out-of-gas},
+\end{align*}
+with score $\text{blocked}'\wedge\text{preserved}'$. This is not the paper's disjunction ``revert or $<$1\%'' verbatim. It has no separate revert branch: when the attack call reverts, the logged profit after the patch is 0, so the threshold counts it as blocked. It differs from the paper's wording in requiring a positive baseline profit and in not counting an out-of-gas replay as preserved. No usable run carried the out-of-gas flag, so that clause changed no verdict here. The rule is a sensitivity analysis, not a proposed validator.
+
+The right half of Table~\ref{tab:results} gives the result; the two rules disagree on the score or on the blocking verdict in 30 of 71 runs. Emit-only full credit falls from 4 of 19 to 0, and emit-only blocking from 19 to 6. In all six remaining cases (bench-27, 36, 57, 76, 80, 534) the unchanged recompile of the same case also has logged profit 0, so the event is associated with no additional blocked verdict under this rule. Revert full credit falls from 5 to 2 (bench-391, 34) and unchanged from 4 to 2 (bench-76, 534).
+
+The same data show the rule's limits. The revert control leaves logged profit at or above 1\% of the original in 11 of 26 cases. We did not locate the cause; an alternative attack path, a wrong etch target or compiled contract, a failed insertion, or partial execution of the attack are all candidates, and under a profit-based usability criterion the usable set would shrink. Four credits remain under the rule: unchanged bench-76 and bench-534, which we do not interpret because recompile-and-etch is not a null intervention; revert bench-391, where the replayed call does not exercise the disabled function; and revert bench-34, not diagnosed. A profit threshold addresses none of these.
+
+\subsection{Candidate reference patches}
+Three candidate reference patches were written by hand from the cases' fix descriptions; they are not independently validated as correct. bench-391 (an access check on \code{setRegistry}) scores 1.0 where the unchanged source scores 0.0. bench-76 (\code{initialize} restricted to the proxy admin) scores 1.0, but its unchanged source already scores 1.0, so this result does not discriminate. bench-559 scores 0.0. Its described fix is in the constructor, which does not run when recompiled runtime bytecode is etched over deployed state; that is a hypothesis from the mechanism, not an isolated cause, and a runtime variant we wrote also scored 0.0 undiagnosed.
+
+\subsection{Unusable cases}
+\label{sec:excl}
+Table~\ref{tab:usable} classifies the 29 cases that were not usable.
+
+\begin{table}[t]
+\caption{The 55 Ethereum patch cases on the command-line path}
+\label{tab:usable}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{0.82\columnwidth}r@{}}
+\toprule
+Outcome & Cases \\
+\midrule
+\textbf{Usable} (emit-only valid in 19) & \textbf{26} \\
+\midrule
+\emph{Original replay fails}: attack does not reproduce before any patch (bench-322, 410, 433, 434) & 4 \\
+\emph{Unchanged recompile fails}: attack replay hits \code{MemoryOOG}/\code{OutOfGas} (bench-02, 103, 112, 198, 31, 416, 562) & 7 \\
+\emph{Ineffective mechanical intervention}: attack survives \code{revert()} in the labelled function (bench-05, 518) & 2 \\
+\emph{Source/build}: our builder found no matching function (5); tool's recompile of staged sources fails for modified controls (7); compile error in forge (2); a different contract compiled and etched (1) & 15 \\
+\emph{Ineligible}: only legitimate transaction is a contract creation (bench-449) & 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The classes carry different meanings. The four original-replay failures occur before any submission is etched. The seven out-of-gas failures occur on the unchanged recompiled source, with cause not isolated. The two cases in which the attack survives \code{revert()} say that our mechanical control was ineffective, not that no patch could succeed. Of the 15 source/build failures, five are limits of our own builder and the seven recompile failures may be caused by the Sourcify file layout rather than by the tool. Whether the benchmark's own path shares any of these outcomes is unknown to us; the release reports no per-case baseline check.
+
+\subsection{Robustness observations}
+In a clean-clone repetition of wave~1, the emit-only control on bench-391 first scored 0.0: the tool's score replay hit a transport error on the free endpoint, the test printed that the historical attack did not succeed before the patch, and the score recorded a failed patch. The retry gave 1.0; both logs are kept. One such failure was seen in about 30 runs of wave~1, and one case (bench-72) was re-run in wave~2. A transport error can thus become a verdict. One case per wave was re-run from scratch in a fresh clone: for bench-391 verdict markers and profits were identical, for bench-220 the verdict markers.
+
+\section{The Headline Comparison}
+\label{sec:doc}
+\subsection{Method and what reproduces}
+The paper's tables were extracted structurally from the arXiv HTML into CSV. One script reads the 541 released case files, the released code and the extracted tables, and prints 16 checks: 5 reproduce a statement of the paper, 5 report a discrepancy and 6 are notes. A companion test corrupts the inputs and asserts that passing verdicts flip. The checks are a selected set; we do not claim that they cover every statement of the paper. Each row of Table~\ref{tab:incons} corresponds to a check in the script output or to a cited file of the release~\cite{audit}.
+
+The release ships 541 case files. The code's patch filter (\code{fixable}, verified source, at least one historical legitimate transaction) yields 94 cases: 31 easy, 43 medium, 18 hard and 2 labelled \code{unknown}. With the two unlabelled cases as their own group, every patch cell of the paper's Table~4 is consistent with a whole number of passes for all ten configurations; 23.4\% corresponds to 22 of 94 (Wilson [16.0, 32.9]\% under a binomial model, ignoring validator error and selection of the best configuration). This checks denominators, not model outcomes. The temporal split (86 incidents dated 2025 or later, 455 earlier) reproduces. The patch subset has more hard cases than the corpus (19.1\% against 11.3\%); re-weighting both tasks' reported strata to one difficulty mix moves the exploitation-minus-patching gap by 0.17 points for the headline configuration and by 0.01 to 0.70 points across the ten. These reweightings change the reported gap little.
+
+\subsection{Three estimands on three sets}
+Table~\ref{tab:estimands} lists what the three headline numbers are. The paper defines each reward carefully; it does not discuss whether the three percentages are comparable, and the abstract reads them as one scale. Raw percentages of differently defined scores on different case sets do not by themselves identify relative task difficulty.
+
+\begin{table}[t]
+\caption{The three headline numbers}
+\label{tab:estimands}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lp{0.37\columnwidth}rl@{}}
+\toprule
+Task (score) & Score definition & Cases & Set in release \\
+\midrule
+Detect (37.5) & exact match of vulnerability type and function & 541 & yes \\
+Exploit (43.7) & mean of $\min(\text{profit}/\text{reference},1)$ & 200 & no \\
+Patch (23.4) & mean of $\mathbf{1}[\text{blocked}]\cdot\mathbf{1}[\text{preserved}]$ & 94 & yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+When present, the evaluation script reads a generated directory \code{exploit\_subset200} under \code{data/benchmark/harbor\_tasks} (\path{src/scripts/2_eval/eval.py}, lines 475--477). That path is excluded by \code{.gitignore} and is not shipped; we found no released code that builds it and no sampling rule in the paper. The overlap between the 200 exploitation cases and the 94 patch cases is unknown, and we could not reproduce 43.7\% from the release. Descriptively, exploitation exceeds detection in 7 of 10 configurations and patching is the lowest of the three scores in 9 of 10. The patch score is the lowest reported; a three-step ordering of task difficulty is not established by these numbers.
+
+\subsection{Internal inconsistencies}
+Table~\ref{tab:incons} lists places where the paper disagrees with itself or with its release.
+
+\begin{table}[t]
+\caption{Statements of the paper, and identities implied by its definitions, against its own tables and release}
+\label{tab:incons}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{0.40\columnwidth}p{0.55\columnwidth}@{}}
+\toprule
+Statement (location) & Evidence \\
+\midrule
+``Opus 4.7 leads on patch pass rate (21.3\%)'' (Sec.~4) & Abstract and Sec.~4: best is 23.4\%. Table~4: 24.5\% for Codex\,$\times$\,GPT-5.2. \\
+Opus 4.7 leads realized profit, \$45.5M (Sec.~4) & Abstract and Table~5: \$57.4M, GPT-5.5. \\
+Table~4 ``All'' equals Table~5 ``Pass\,\%'' & Agree for 9 of 10 configurations; GPT-5.2 reads 24.5 against 17.5. \\
+Rates are over 94 cases & Three Table~5 cells are not $k/94$ for any integer $k$. \\
+``All models show monotonic degradation from easy to hard'' (Sec.~4.2) & 11 of 30 task rows of Table~4 are not monotonic, including GPT-5.5 exploit 39.8/50.5/33.2 and patch 19.4/32.6/11.1. \\
+Attack ``must revert'' (four places) & Scorer: fails, or return data changes, or log hash changes. \\
+Patch ``deployed via proxy upgrade'' & Bytecode is etched, at two addresses in the two checks. \\
+$153-31-29$ yields 94 (Sec.~3) & The arithmetic gives 93; the code removes 39, then 20. \\
+Pre/post cutoff 44.9/38.8, overall 42.3 (Opus 4.7 exploit) & Implies about 85 post-cutoff cases in the 200 (82 to 88.5 given one-decimal rounding); corpus has 86. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\para{Table~4 against Table~5} The two columns report the same quantity. For GPT-5.2, the block rate 56.1 and pass rate 17.5 of Table~5 are not multiples of $1/94$ but are consistent with $k/57$; a third cell (DeepSeek~V4 block rate 54.0) is also not $k/94$. A different denominator and a transcription error both remain possible.
+
+\para{Monotonic degradation} The sentence fails in 11 of 30 rows of Table~4 (ten configurations, three tasks). The headline configuration is Codex\,$\times$\,GPT-5.5, the Table~4 row that gives all three abstract numbers; monotonicity fails in its exploitation and patching rows, where the medium stratum scores above the easy one (its detection row is monotonic).
+
+\para{The shipped leaderboard} The file \path{site/assets/leaderboard.json} differs from Table~4 by more than rounding for 6 of 10 configurations on at least one task. Several of these rows are computed over different case counts (for example GPT-5.2 patch over 189 results and GPT-5.4 exploit over 220), and the builder script notes that the Codex rows come from an earlier leaderboard, so those differences reflect different populations. Four differences occur at the paper's own counts: DeepSeek exploit 36.6 against 36.8 ($n=200$), GLM patch 3.2 against 9.6 ($n=94$), MiniMax patch 0.0 against 2.1 ($n=94$) and the headline GPT-5.5 detection 37.5 against 51.4 ($n=541$). The headline cells 43.7 and 23.4 match.
+
+\para{The temporal split} If the three Opus~4.7 exploitation figures are one weighted mean over the 200 cases, the set must contain about 85 post-cutoff incidents (82 to 88.5 given one-decimal rounding of the three figures), against 86 in the corpus and about 32 for a proportional sample. Either the exploitation set is skewed toward recent incidents, which would bear on the contamination argument, or the figures come from different populations; the release cannot settle which. The paper prints no post-cutoff patch number; only 9 of the 94 patch cases are post-cutoff.
+
+\para{Smaller items} The paper reports 42\% easy cases. That figure is reached only if the 12 \code{unknown}-difficulty cases count as easy (225/541 = 41.6\%, against 39.4\% without them), which is what \path{site/build_cases.py}, lines 33--35, does. Nine cases carry curator flags marking them disputed or to be skipped; no code under \code{src/} or \code{site/} reads those flags, and two of them, described by the curators as key compromises, are in the patch subset.
+
+\section{Threats to Validity}
+\label{sec:threats}
+\para{Recompilation} All controls are recompiled sources and the on-chain hosting control was not run. The pair of Table~\ref{tab:pair} holds this constant within a case, but the preservation half of every score, including those three, is measured on recompiled code.
+
+\para{Sources and toolchain} Sources came from Sourcify, not from the explorer path the benchmark uses, which was not exercised. A different forge version could change gas use and some verdicts.
+
+\para{Mechanical controls and selection} The revert and emit-only controls are inserted by pattern matching into the labelled function. The usability criterion filters on the released rule's blocking verdict for the revert control. Usable cases are a selected set, not a random sample of the 94 patch cases, Ethereum only; counts are pilot sizes (26 usable, 19 with a valid emit-only control, 3 candidate reference patches), and dependence between cases is not modelled.
+
+\para{Transient errors} The free RPC endpoint produced transient errors; affected runs were re-run and both logs kept. In the one diagnosed instance the error turned 1.0 into 0.0. Undetected errors could contaminate a verdict in either direction.
+
+\para{Agent behaviour} Whether agents in the original evaluation submitted patches resembling these controls is unknown; the release does not include their outputs.
+
+\para{Our own record} An earlier public version of this audit overstated several claims; the corrections are itemised in the repository changelog~\cite{audit}.
+
+\section{Recommendations}
+\begin{enumerate}
+\item \textbf{Publish the exploitation case list} and its sampling rule, and report patch and exploitation scores on common cases with matched attempt budgets before any statement about relative difficulty.
+\item \textbf{Run a hosting control per case.} Etch the on-chain runtime bytecode and require that the historical attack still pays and the legitimate calls still pass; then require the same of the recompiled unchanged source. Report the cases that fail either.
+\item \textbf{Ship negative controls with expected outcomes.} On hosted cases, run \code{revert()} and emit-only submissions and state in advance which component each should fail. Report the acceptance counts as a property of the benchmark.
+\item \textbf{Ship positive controls.} Independently checked reference patches, including ones that legitimately change an event or an amount, with rejection counts. For fixes that live in a constructor or in storage layout, define and validate a supported deployment, upgrade or state-migration intervention.
+\item \textbf{Require a profit reduction for blocking}, as the paper's text already suggests; do not count out-of-gas replays as preserved; treat transport errors as errors. Our rescoring indicates that this is insufficient without the hosting control and a check that the replayed calls exercise the patched code.
+\item \textbf{Report counts}, per-stratum and per-case outcomes, so that tables can be checked against each other.
+\end{enumerate}
+The negative and positive controls require no model inference. Even with them, one attack and a handful of historical calls remain an incomplete specification: the controls would make the replay-based score better supported, not a certificate of patch correctness.
+
+\section{Conclusion}
+On the command-line path of the released patch validator, we observed three cases in which the unchanged source scored 0.0 and the same source with one added event scored 1.0 while the logged attacker profit was identical. The blocking predicate reported the event-only control as blocking in all 19 valid cases; a profit-threshold sensitivity rule removed its full credit, and four credits remained under that rule: two for unchanged sources (bench-76, 534), not interpreted because recompile-and-etch is not a null intervention, one for \code{revert()} where the replayed call does not exercise the disabled function (bench-391), and one for \code{revert()} that is not diagnosed (bench-34). These are observations about the released tool on our setup, not corrections to published scores. Separately, the release reproduces the patch-subset counts and patch arithmetic we checked, does not identify the exploitation set, and the three headline numbers are not one scale. We recommend that hosting, negative and positive controls be reported with the benchmark.
+
+\section*{Data and Artifact Availability}
+All scripts, extracted tables, raw forge logs, per-run tables, flaked runs and tests are public~\cite{audit} at \url{https://github.com/tonydzi/cyberchainbench-audit}, tag \code{v3.0-agent27}; the upstream is pinned at commit \code{1cb7410}. Offline: \code{make} clones the upstream and runs the 16 checks with no keys, RPC or model; \code{make red} corrupts the inputs and shows the passing verdicts flip; \code{calibration/rescore\_profit\_rule.py} recomputes Table~\ref{tab:results} from the shipped result files, with \code{\_test\_rescore\_profit\_rule.py} as its test; \path{calibration/evidence/paired-emit-only.md} holds the integers of Table~\ref{tab:pair} and \path{calibration/evidence/sourcify-bench-76-compilation.json} the bench-76 compiler settings. Network-dependent: the forks are reproduced from \code{calibration/} with an Ethereum archive RPC endpoint (\code{stage\_sources.py}, \code{make\_arms.py}, \code{run\_all.sh}, \code{run\_wave2.sh}, \code{wave2\_table.py}). The benchmark data is not redistributed.
+
+\section*{Use of AI Tools}
+The audit scripts, the reading of the release and drafts of this text were produced with AI assistance (Anthropic Claude). Adversarial reviews of intermediate conclusions were run with OpenAI Codex, xAI Grok, Google Gemini and Z.ai GLM. One of those reviews refuted a stronger claim of an earlier version; the refutation is published with its prompts. The author is responsible for every claim.
+
+\section*{Acknowledgment}
+The author thanks shane-moore for the prior public reports on the release, and the benchmark's authors for publishing code and data that make an audit of this kind possible.
+
+\begin{thebibliography}{00}
+\bibitem{ccb} J.~Huang, F.~Jiang, R.~Poovendran, and Z.~Lin, ``CyberChainBench: Can AI agents secure smart contracts against real-world on-chain vulnerabilities?'' arXiv:2606.26216v1, 2026. Release: \url{https://github.com/defai-labs/CyberChainBench}, commit 1cb7410.
+\bibitem{dfhl} SunWeb3Sec, ``DeFiHackLabs,'' GitHub repository. \url{https://github.com/SunWeb3Sec/DeFiHackLabs}
+\bibitem{qi2015} Z.~Qi, F.~Long, S.~Achour, and M.~Rinard, ``An analysis of patch plausibility and correctness for generate-and-validate patch generation systems,'' in \emph{Proc. ISSTA}, 2015.
+\bibitem{smith2015} E.~K.~Smith, E.~T.~Barr, C.~Le~Goues, and Y.~Brun, ``Is the cure worse than the disease? Overfitting in automated program repair,'' in \emph{Proc. ESEC/FSE}, 2015.
+\bibitem{patchbench} C.~Shen, J.~Li, A.~Mahajan, J.~S.~Tian, Y.~Kwon, and Y.~Chen, ``PatchBench: Evaluating AI agents for vulnerability patching,'' arXiv:2609.04075, 2026.
+\bibitem{robobugbench} A.~Tuzikov, ``RoboBugBench: Benchmarking automated repair of real robot software under an audited behavioral oracle,'' arXiv:2610.16369, 2026.
+\bibitem{moore} shane-moore, Issue \#8 and pull requests \#1--\#7 on \code{defai-labs/CyberChainBench}, GitHub, Oct. 2026.
+\bibitem{audit} A.~Dziatkovskii, ``cyberchainbench-audit,'' GitHub repository, tag v3.0-agent27, 2026. \url{https://github.com/tonydzi/cyberchainbench-audit}
+\end{thebibliography}
+
+\end{document}

@@ -69,6 +69,8 @@ We set out to show that number was wrong. It is not wrong arithmetically. What w
 instead is narrower and, we think, more useful: what the release lets anyone check, what it
 does not, where the paper contradicts itself, and what the patch oracle actually tests.
 
+**Workshop paper (AGENT 2027 @ ICSE submission, 7 pages, IEEE):** [paper/agent27/paper.pdf](paper/agent27/paper.pdf) · source [paper/agent27/paper.tex](paper/agent27/paper.tex). Central result: a controlled pair where adding one event to otherwise unchanged source turns a 0.0 into a full-credit 1.0 with attacker profit identical to the wei.
+
 **Technical comment (arXiv-ready, 5 pages):** [paper/comment.pdf](paper/comment.pdf) · source [paper/comment.tex](paper/comment.tex) · submission notes [paper/ARXIV.md](paper/ARXIV.md)
 **Read the article:** [docs/article-en.md](docs/article-en.md) · [docs/article-ru.md](docs/article-ru.md)
 **Every finding with its verification record:** [FINDINGS.md](FINDINGS.md)

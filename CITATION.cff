@@ -10,8 +10,8 @@ authors:
 repository-code: "https://github.com/tonydzi/cyberchainbench-audit"
 url: "https://github.com/tonydzi/cyberchainbench-audit"
 license: MIT
-date-released: "2026-10-20"
-version: "2.0.0"
+date-released: "2026-11-16"
+version: "3.0.0"
 keywords:
   - benchmark-audit
   - llm-evaluation

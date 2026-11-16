@@ -40,7 +40,7 @@ revert 5 of 26 (8.5% to 37.9%), emit_only 4 of 19 (8.5% to 43.3%).
 Reading: the strict "any observable change" rule for blocking fired on all 16 emit-only runs, and in 8 of them the
 attacker's profit was exactly the same number before and after. In all 13 emit-only runs that scored 0 the normal
 replay was not fully preserved (`preserved_count` below `checked_count` in `results.csv`); the forge output names `logs changed`
-in 8 of them and `success changed` in 1, the other 4 fail with a message not categorised here. 3 runs scored 1.0. Three cases gave 1.0 to the unmodified source
+in 8 of them (bench-117, 23, 266, 428, 534, 567, 72, 84) and `success changed` in 5 (bench-27, 36, 44, 57, 80); none is uncategorised (recounted from the raw logs on 2026-11-16; an earlier version said 8 / 1 / 4). 3 runs scored 1.0. Three cases gave 1.0 to the unmodified source
 (bench-239, 534, 567; bench-567 is the case in upstream issue #8).
 
 ## Why the other cases are excluded

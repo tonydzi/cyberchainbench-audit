@@ -1,5 +1,15 @@
 # Changelog
 
+## v3.0, 2026-11-16
+
+Workshop paper for AGENT 2027 @ ICSE: [paper/agent27/](paper/agent27/), 7 pages, IEEEtran, built with pdfLaTeX.
+
+- Central result: a controlled emit-only pair. In bench-220, 391 and 515 the unchanged source scores 0.0 and the same source plus one emitted event scores 1.0, with attacker profit identical to the wei before and after ([calibration/evidence/paired-emit-only.md](calibration/evidence/paired-emit-only.md)).
+- New `calibration/rescore_profit_rule.py`: rescores the existing runs under a profit rule (blocked = profit after below 1% of profit before, from the paper's own "<1%" wording; out-of-gas is not preserved). Full credit: unchanged 4 to 2 of 26, revert 5 to 2 of 26, emit-only 4 to 0 of 19. Red-first test `_test_rescore_profit_rule.py` (threshold and out-of-gas mutations both turn it red).
+- Corrected: wave 2 emit-only zeros are 8 `logs changed` and 5 `success changed`, none uncategorised (an earlier count said 8 / 1 / 4).
+- New evidence: Sourcify compilation settings of bench-76.
+- Not done: the Harbor verifier path, a control with on-chain bytecode instead of the recompile.
+
 ## v2.3, 2026-10-23
 
 Second patch-oracle calibration (wave 2), no model, no transaction: [calibration/wave2/README.md](calibration/wave2/README.md). (Numbered v2.3 because v2.2 was already taken by the arXiv comment below.)
