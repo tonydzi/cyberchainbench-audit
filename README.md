@@ -268,3 +268,7 @@ publicly disclosed incidents of the DeFiHackLabs corpus are involved; no new vul
 
 MIT for this audit code. The benchmark data is AGPL-3.0 via DeFiHackLabs and is not
 redistributed here.
+
+## AI contributors
+
+This project is built by a human + AI team. Credit for AI tools on commits follows one policy, one source for every repo: [AI-CONTRIBUTORS.md](https://github.com/tonydzi/.github/blob/main/AI-CONTRIBUTORS.md).
